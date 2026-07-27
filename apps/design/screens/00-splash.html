@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon-i-playv.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .splash {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(ellipse at center, var(--color-bg-elev-2) 0%, var(--color-bg) 70%);
+      position: relative;
+      overflow: hidden;
+    }
+    .splash::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 31, 90, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(255, 200, 80, 0.1) 0%, transparent 50%);
+      animation: splash-pulse 3s ease-in-out infinite;
+    }
+    @keyframes splash-pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    .splash__logo {
+      width: 80%;
+      max-width: 320px;
+      animation: splash-fade-in 800ms var(--ease-out) both;
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes splash-fade-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .splash__tagline {
+      position: absolute;
+      bottom: 12%;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: var(--text-sm);
+      letter-spacing: var(--tracking-widest);
+      text-transform: uppercase;
+      color: var(--color-text-3);
+      animation: splash-fade-in 800ms 200ms var(--ease-out) both;
+    }
+    .splash__loader {
+      position: absolute;
+      bottom: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      height: 2px;
+      background: var(--color-bg-elev-2);
+      border-radius: 2px;
+      overflow: hidden;
+      animation: splash-fade-in 800ms 400ms var(--ease-out) both;
+    }
+    .splash__loader::after {
+      content: '';
+      display: block;
+      width: 50%;
+      height: 100%;
+      background: var(--gradient-accent);
+      animation: splash-loader 1.2s ease-in-out infinite;
+    }
+    @keyframes splash-loader {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(300%); }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen">
+    <div class="splash">
+      <img class="splash__logo" src="../assets/icons/splash-logo.svg" alt="vidashort">
+      <div class="splash__tagline">Endless Drama · One Swipe</div>
+      <div class="splash__loader"></div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script>
+    // Auto-advance after 1.5s
+    setTimeout(() => {
+      const onboarded = vidashort.Storage.isOnboarded();
+      const ageConfirmed = vidashort.Storage.getAgeConfirmed();
+      if (!ageConfirmed) {
+        window.location.href = './04-age-gate.html';
+      } else if (!onboarded) {
+        window.location.href = './01-onboarding.html';
+      } else {
+        window.location.href = './10-home.html';
+      }
+    }, 1500);
+  </script>
+</body>
+</html>

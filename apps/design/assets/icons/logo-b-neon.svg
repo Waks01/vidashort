@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  logo-b-neon.svg — STOPGAP / alt wordmark concept (archive only).
+  Brand spec mentions this as "Reference · Neon" — not rendered in any HTML.
+  Reference only. Real implementation should come from Figma.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 180" width="480" height="180">
+  <defs>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#ff4d80"/>
+      <stop offset="50%" stop-color="#ff1f5a"/>
+      <stop offset="100%" stop-color="#b3002b"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <g filter="url(#glow)" opacity="0.6">
+    <rect x="20" y="60" width="440" height="80" fill="url(#neon)"/>
+  </g>
+  <rect x="20" y="60" width="440" height="80" fill="none" stroke="url(#neon)" stroke-width="2"/>
+  <text x="35" y="120" font-family="sans-serif" font-size="48" font-weight="800" fill="#f5e9d4" font-style="italic">vidashort</text>
+</svg>

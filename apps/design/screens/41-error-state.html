@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Error state</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .er { padding: 0 20px 24px; }
+    .er__group { margin-bottom: 32px; }
+    .er__group h2 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-md); margin-bottom: 8px; padding: 0 4px; }
+    .err { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 48px 20px; text-align: center; }
+    .err--network { border-color: var(--color-warning); }
+    .err--payment { border-color: var(--color-error); }
+    .err i { font-size: 64px; color: var(--color-warning); margin-bottom: 12px; display: block; }
+    .err--payment i { color: var(--color-error); }
+    .err h3 { font-weight: 800; font-size: 15px; }
+    .err p { color: var(--color-text-2); font-size: 12px; margin-top: 6px; max-width: 260px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+    .err .err__code { font-family: monospace; font-size: 10px; color: var(--color-text-3); margin-top: 6px; }
+    .err .btn { margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Error states"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="er">
+      <div class="er__group">
+        <h2>1. Network offline</h2>
+        <div class="err err--network">
+          <i class="ph-duotone ph-wifi-x"></i>
+          <h3>No connection</h3>
+          <p>We can't reach the internet. Check your Wi-Fi or mobile data and try again.</p>
+          <a class="btn btn-primary">Retry</a>
+        </div>
+      </div>
+
+      <div class="er__group">
+        <h2>2. Playback error</h2>
+        <div class="err err--network">
+          <i class="ph-duotone ph-play-circle"></i>
+          <h3>This episode won't play</h3>
+          <p>Something went wrong while loading. Please try again — we won't count this against your coins.</p>
+          <div class="err__code">Error code: MEDIA_ERR_DECODE</div>
+          <a class="btn btn-primary">Try again</a>
+        </div>
+      </div>
+
+      <div class="er__group">
+        <h2>3. Payment failed</h2>
+        <div class="err err--payment">
+          <i class="ph-duotone ph-x-circle"></i>
+          <h3>Payment didn't go through</h3>
+          <p>Your purchase was cancelled. No coins were added. You can try again with the same or a different payment method.</p>
+          <div class="err__code">Error code: PAYMENT_CANCELLED</div>
+          <a class="btn btn-primary">Try again</a>
+          <a class="btn btn-secondary" style="margin-left:8px;">Use a different method</a>
+        </div>
+      </div>
+
+      <div class="er__group">
+        <h2>4. Server error</h2>
+        <div class="err err--network">
+          <i class="ph-duotone ph-cloud-x"></i>
+          <h3>vidashort is having a moment</h3>
+          <p>Our servers hit a snag. We're on it. Please try again in a few minutes.</p>
+          <div class="err__code">Error code: 503</div>
+          <a class="btn btn-primary">Reload</a>
+        </div>
+      </div>
+
+      <div class="er__group">
+        <h2>5. Sign-in failed</h2>
+        <div class="err err--payment">
+          <i class="ph-duotone ph-keyhole"></i>
+          <h3>Wrong email or password</h3>
+          <p>Double-check your credentials. Need help recovering your account?</p>
+          <a class="btn btn-primary">Try again</a>
+          <a class="btn btn-secondary" style="margin-left:8px;">Forgot password</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+</body>
+</html>

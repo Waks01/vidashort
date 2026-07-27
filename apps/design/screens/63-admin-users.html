@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Users</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; }
+    .us { padding: 0 20px; }
+    .us__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-xl); padding: 16px 0 4px; }
+    .us__stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 16px; }
+    .us__stat { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px; text-align: center; }
+    .us__stat-val { font-weight: 800; font-size: var(--text-lg); color: var(--color-text-1); font-variant-numeric: tabular-nums; }
+    .us__stat-lbl { font-size: 9px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .us__search { width: 100%; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px 14px 10px 36px; color: var(--color-text-1); font-size: var(--text-sm); margin-bottom: 12px; outline: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="%236b5a4d" viewBox="0 0 256 256"><path d="M229.66 218.34l-50.07-50.06a88.21 88.21 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg>'); background-repeat: no-repeat; background-position: 12px center; }
+    .us__search:focus { border-color: var(--color-accent-1); }
+    .us__filter { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
+    .us__filter::-webkit-scrollbar { display: none; }
+    .us__row { display: flex; align-items: center; gap: 12px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; margin-bottom: 6px; }
+    .us__avatar { width: 40px; height: 40px; border-radius: 50%; background-size: cover; background-position: center; flex-shrink: 0; background-color: var(--color-bg-elev-2); }
+    .us__body { flex: 1; min-width: 0; }
+    .us__name { font-weight: 700; font-size: var(--text-sm); }
+    .us__email { font-size: 11px; color: var(--color-text-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .us__right { text-align: right; flex-shrink: 0; }
+    .us__role { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 4px; }
+    .us__role--viewer  { background: var(--color-bg-elev-2); color: var(--color-text-2); }
+    .us__role--creator { background: rgba(255, 226, 122, 0.15); color: var(--color-gold-1); }
+    .us__role--admin   { background: rgba(255, 31, 90, 0.15); color: var(--color-accent-1); }
+    .us__vip { color: var(--color-gold-1); font-size: 10px; font-weight: 700; }
+    .us__flag { color: var(--color-error); font-size: 10px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Users"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="us">
+      <div class="us__title">All users</div>
+      <div class="us__stats">
+        <div class="us__stat"><div class="us__stat-val" id="total">0</div><div class="us__stat-lbl">Total</div></div>
+        <div class="us__stat"><div class="us__stat-val" id="creators">0</div><div class="us__stat-lbl">Creators</div></div>
+        <div class="us__stat"><div class="us__stat-val" id="vip">0</div><div class="us__stat-lbl">VIP</div></div>
+      </div>
+      <input class="us__search" id="search" placeholder="Search by name, email, country…">
+      <div class="us__filter">
+        <button class="chip chip--selected" data-role="all">All</button>
+        <button class="chip" data-role="viewer">Viewers</button>
+        <button class="chip" data-role="creator">Creators</button>
+        <button class="chip" data-role="flagged">Flagged</button>
+      </div>
+      <div id="list"></div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    if (vidashort.Storage.getRole() !== 'admin') vidashort.Storage.setRole('admin');
+    const users = vidashort.MockData.adminUsers;
+    const total = users.length;
+    const creators = users.filter(u => u.role === 'creator').length;
+    const vip = users.filter(u => u.vip).length;
+    document.getElementById('total').textContent = total.toLocaleString();
+    document.getElementById('creators').textContent = creators;
+    document.getElementById('vip').textContent = vip;
+
+    function render(filter, q) {
+      let list = users;
+      if (filter === 'flagged') list = list.filter(u => u.status === 'flagged');
+      else if (filter !== 'all') list = list.filter(u => u.role === filter);
+      if (q) list = list.filter(u => u.name.toLowerCase().includes(q.toLowerCase()) || u.email.toLowerCase().includes(q.toLowerCase()) || u.country.toLowerCase().includes(q.toLowerCase()));
+      const el = document.getElementById('list');
+      if (!list.length) { el.innerHTML = '<div style="text-align:center; padding:32px; color:var(--color-text-3); font-size:13px;">No users match.</div>'; return; }
+      el.innerHTML = list.map(u => `
+        <div class="us__row">
+          <div class="us__avatar" style="background-image:url('https://i.pravatar.cc/150?u=${u.id}');"></div>
+          <div class="us__body">
+            <div class="us__name">${u.name} ${u.vip ? '<span class="us__vip">★ VIP</span>' : ''} ${u.status === 'flagged' ? '<span class="us__flag">⚠ FLAGGED</span>' : ''}</div>
+            <div class="us__email">${u.email} • ${u.country} • ${u.joinedAt}</div>
+          </div>
+          <div class="us__right">
+            <span class="us__role us__role--${u.role}">${u.role}</span>
+            <div style="font-size:10px; color:var(--color-text-3); margin-top:4px;">${u.country}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    render('all', '');
+
+    document.getElementById('search').addEventListener('input', e => {
+      const active = document.querySelector('.chip--selected');
+      render(active ? active.dataset.role : 'all', e.target.value);
+    });
+    document.querySelector('.us__filter').addEventListener('click', e => {
+      const c = e.target.closest('.chip');
+      if (!c) return;
+      document.querySelectorAll('.chip').forEach(x => x.classList.toggle('chip--selected', x === c));
+      render(c.dataset.role, document.getElementById('search').value);
+    });
+  </script>
+</body>
+</html>

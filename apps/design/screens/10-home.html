@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Home</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    /* Hide global chrome (topbar/bottomnav) — feed has its own chrome per-slide. */
+    body { padding: 0; overflow: hidden; background: #000; }
+    .feed { height: 100vh; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; scrollbar-width: none; }
+    .feed::-webkit-scrollbar { display: none; }
+
+    .feed__item { height: 100vh; scroll-snap-align: start; scroll-snap-stop: always; position: relative; overflow: hidden; background: #000; }
+
+    /* Animated cinematic gradient stand-in for video */
+    .feed__bg { position: absolute; inset: 0; background: linear-gradient(135deg, var(--color-accent-1) 0%, var(--color-accent-2) 50%, #2a0010 100%); background-size: 200% 200%; animation: feed-shift 18s ease-in-out infinite; }
+    .feed__item:nth-child(3n+2) .feed__bg { background: linear-gradient(135deg, #4a0014 0%, var(--color-accent-1) 50%, #ff4d80 100%); background-size: 200% 200%; }
+    .feed__item:nth-child(3n+3) .feed__bg { background: linear-gradient(135deg, #1a0008 0%, #4a0014 50%, var(--color-accent-2) 100%); background-size: 200% 200%; }
+    .feed__item:nth-child(3n+4) .feed__bg { background: linear-gradient(135deg, #2a0010 0%, #b3002b 50%, var(--color-accent-1) 100%); background-size: 200% 200%; }
+    @keyframes feed-shift { 0%,100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
+
+    /* Noise + vignette */
+    .feed__bg::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"); mix-blend-mode: overlay; opacity: 0.45; pointer-events: none; }
+    .feed__bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.7) 100%); pointer-events: none; }
+
+    /* Top translucent chrome for the feed */
+    .feed__top { position: absolute; top: 0; left: 0; right: 0; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; z-index: 5; background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%); }
+    .feed__brand { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 20px; color: white; }
+    .feed__brand .feed__brand-dot { display: inline-block; width: 8px; height: 8px; background: var(--color-gold-1); border-radius: 50%; margin: 0 1px 4px 0; box-shadow: var(--glow-gold); }
+    .feed__top-right { display: flex; align-items: center; gap: 10px; }
+    .feed__coins { display: inline-flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,226,122,0.4); border-radius: 999px; padding: 4px 10px; color: var(--color-gold-1); font-weight: 800; font-size: 12px; }
+    .feed__icon-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.5); display: grid; place-items: center; color: white; font-size: 18px; cursor: pointer; }
+    .feed__search-trigger { padding: 0 14px; height: 36px; border-radius: 999px; background: rgba(0,0,0,0.5); display: inline-flex; align-items: center; gap: 6px; color: white; font-size: 12px; font-weight: 600; }
+
+    /* Bottom-left meta (title/series/synopsis) */
+    .feed__meta { position: absolute; bottom: 80px; left: 0; right: 70px; padding: 0 20px; z-index: 4; }
+    .feed__series { display: inline-flex; align-items: center; gap: 6px; color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .feed__series-avatar { width: 22px; height: 22px; border-radius: 50%; background-size: cover; border: 1px solid var(--color-accent-1); }
+    .feed__title { font-family: var(--font-display); font-weight: 800; font-style: italic; color: white; font-size: 24px; line-height: 1.1; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+    .feed__ep { color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .feed__syn { color: rgba(255,255,255,0.75); font-size: 12px; line-height: 1.4; max-width: 95%; }
+
+    /* Right-side action column */
+    .feed__actions { position: absolute; right: 12px; bottom: 90px; z-index: 4; display: flex; flex-direction: column; gap: 18px; align-items: center; }
+    .feed__action { display: flex; flex-direction: column; align-items: center; gap: 4px; color: white; cursor: pointer; }
+    .feed__action-avatar { width: 44px; height: 44px; border-radius: 50%; background-size: cover; border: 2px solid white; }
+    .feed__action-bubble { width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.45); display: grid; place-items: center; font-size: 22px; color: white; }
+    .feed__action-count { font-size: 10px; font-weight: 700; }
+    .feed__action--heart .feed__action-bubble { color: var(--color-accent-1); }
+    .feed__action--heart.is-liked .feed__action-bubble { color: var(--color-accent-1); }
+
+    /* Coin-cost / VIP chip on the action column */
+    .feed__cost { margin-top: 4px; padding: 6px 10px; border-radius: 999px; background: var(--gradient-gold); color: #1a0e00; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
+    .feed__cost--vip { background: var(--gradient-accent); color: white; }
+
+    /* Bottom nav for the feed */
+    .feed__nav { position: absolute; bottom: 0; left: 0; right: 0; height: 64px; background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 100%); backdrop-filter: blur(12px); display: flex; justify-content: space-around; align-items: center; z-index: 6; }
+    .feed__nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; color: rgba(255,255,255,0.6); font-size: 10px; font-weight: 600; cursor: pointer; }
+    .feed__nav-item i { font-size: 20px; }
+    .feed__nav-item--active { color: var(--color-accent-1); }
+
+    /* Sponsored card variant */
+    .feed__sponsored { position: absolute; top: 64px; left: 12px; background: rgba(0,0,0,0.6); border-radius: 999px; padding: 4px 10px; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: white; z-index: 4; }
+    .feed__dismiss { position: absolute; top: 64px; right: 12px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.6); display: grid; place-items: center; color: white; font-size: 14px; z-index: 4; cursor: pointer; }
+
+    /* Floating progress bar at very bottom of each slide */
+    .feed__progress { position: absolute; bottom: 64px; left: 0; height: 2px; background: rgba(255,255,255,0.2); width: 100%; z-index: 5; }
+    .feed__progress-bar { height: 100%; background: var(--gradient-gold); width: 0; transition: width 100ms linear; }
+
+    /* Tap-pause indicator */
+    .feed__pause { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; opacity: 0; transition: opacity 150ms; pointer-events: none; }
+    .feed__pause.is-show { opacity: 1; }
+    .feed__pause i { font-size: 80px; color: rgba(255,255,255,0.85); }
+
+    /* Heart particles */
+    .heart-burst { position: absolute; z-index: 7; font-size: 32px; color: var(--color-accent-1); pointer-events: none; animation: heart-fly 900ms ease-out forwards; }
+    @keyframes heart-fly {
+      0% { transform: translate(0,0) scale(0.6); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translate(var(--dx, 0), var(--dy, -120px)) scale(1.4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="feed" id="feed"></div>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    // Build feed: intersperse episodes + sponsored cards every 6th
+    const feed = document.getElementById('feed');
+    const items = [];
+    const allEpisodes = vidashort.MockData.allFeedEpisodes || vidashort.MockData.allSeries.flatMap(s => s.episodes.map(e => ({...e, series: s})));
+    let eIdx = 0;
+    for (let i = 0; i < 9; i++) {
+      if (i > 0 && i % 3 === 0) items.push({ type: 'sponsored', payload: vidashort.MockData.sponsored });
+      const ep = allEpisodes[eIdx % allEpisodes.length];
+      items.push({ type: 'episode', payload: ep });
+      eIdx++;
+    }
+
+    const isVip = vidashort.Storage.isVIP();
+    const coins = vidashort.Storage.getCoins();
+
+    function slide(item) {
+      if (item.type === 'sponsored') {
+        const s = item.payload;
+        return `
+          <section class="feed__item">
+            <div class="feed__bg" style="background: linear-gradient(135deg, #2a0010, var(--color-accent-1), var(--color-accent-2));"></div>
+            <div class="feed__sponsored">Sponsored</div>
+            <div class="feed__dismiss" data-dismiss="${s.id}"><i class="ph ph-x"></i></div>
+            <div class="feed__meta" style="bottom: 120px;">
+              <div class="feed__title">${s.title}</div>
+              <div class="feed__syn">${s.sponsor} • Tap to watch this drama</div>
+              <div style="margin-top:14px; display:inline-flex; align-items:center; gap:6px; padding:10px 18px; background: var(--gradient-accent); color:white; border-radius:999px; font-weight:800; font-size:13px;">Watch now</div>
+            </div>
+            <div class="feed__actions">
+              <div class="feed__action">
+                <div class="feed__action-bubble"><i class="ph-bold ph-share-network"></i></div>
+                <div class="feed__action-count">Share</div>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+      const ep = item.payload;
+      const series = ep.series || { title: 'Series', cover: ep.cover, creator: { name: 'Studio', avatar: '' } };
+      const free = isVip || coins >= (ep.requiredCoins || 25);
+      return `
+        <section class="feed__item" data-ep-id="${ep.id}">
+          <div class="feed__bg"></div>
+          <div class="feed__meta">
+            <div class="feed__series">
+              <div class="feed__series-avatar" style="background-image:url('${series.cover}')"></div>
+              @${series.creator ? series.creator.handle : 'vidashort'}
+            </div>
+            <div class="feed__title">${series.title}</div>
+            <div class="feed__ep">Ep ${ep.number} • ${ep.duration}s</div>
+            <div class="feed__syn">${ep.synopsis || 'A new chapter unfolds…'}</div>
+          </div>
+          <div class="feed__actions">
+            <div class="feed__action" data-action="creator">
+              <div class="feed__action-avatar" style="background-image:url('${series.cover}')"></div>
+            </div>
+            <div class="feed__action feed__action--heart" data-action="like">
+              <div class="feed__action-bubble"><i class="ph-bold ph-heart"></i></div>
+              <div class="feed__action-count">${ep.likes || 1240}</div>
+            </div>
+            <div class="feed__action" data-action="comment">
+              <div class="feed__action-bubble"><i class="ph-bold ph-chat-circle"></i></div>
+              <div class="feed__action-count">${ep.comments || 87}</div>
+            </div>
+            <div class="feed__action" data-action="share">
+              <div class="feed__action-bubble"><i class="ph-bold ph-share-network"></i></div>
+              <div class="feed__action-count">Share</div>
+            </div>
+            <div class="feed__action" data-action="cost">
+              ${free
+                ? (isVip ? `<div class="feed__cost feed__cost--vip"><i class="ph-fill ph-crown"></i> VIP</div>` : `<div class="feed__cost"><i class="ph-fill ph-coins"></i> ${ep.requiredCoins}</div>`)
+                : `<div class="feed__cost feed__cost--vip"><i class="ph-bold ph-lock"></i> Lock</div>`}
+            </div>
+          </div>
+          <div class="feed__pause"><i class="ph-fill ph-pause"></i></div>
+          <div class="feed__progress"><div class="feed__progress-bar" data-prog></div></div>
+        </section>
+      `;
+    }
+
+    feed.innerHTML = items.map(slide).join('');
+
+    // Top fixed chrome (one global top + bottomnav)
+    const topEl = document.createElement('div');
+    topEl.className = 'feed__top';
+    topEl.innerHTML = `
+      <div class="feed__brand">vida<span class="feed__brand-dot"></span>short</div>
+      <div class="feed__top-right">
+        <a class="feed__coins" href="./21-wallet.html"><i class="ph-fill ph-coins"></i> <span id="coinBalance">${coins.toLocaleString()}</span></a>
+        <a class="feed__icon-btn" href="./32-notifications.html"><i class="ph-bold ph-bell"></i></a>
+        <a class="feed__search-trigger" href="./12-search.html"><i class="ph-bold ph-magnifying-glass"></i> Search</a>
+      </div>
+    `;
+    document.body.appendChild(topEl);
+
+    const navEl = document.createElement('div');
+    navEl.className = 'feed__nav';
+    navEl.innerHTML = `
+      <a class="feed__nav-item feed__nav-item--active" href="./10-home.html"><i class="ph-fill ph-house"></i>Home</a>
+      <a class="feed__nav-item" href="./11-discover.html"><i class="ph-bold ph-compass"></i>Discover</a>
+      <a class="feed__nav-item" href="./20-library.html"><i class="ph-bold ph-bookmark-simple"></i>Library</a>
+      <a class="feed__nav-item" href="./21-wallet.html"><i class="ph-bold ph-wallet"></i>Wallet</a>
+      <a class="feed__nav-item" href="./30-profile.html"><i class="ph-bold ph-user"></i>Profile</a>
+    `;
+    document.body.appendChild(navEl);
+
+    // Gesture handling: tap = pause, double-tap = heart, tap-right = next, tap-left = prev
+    let lastTap = 0;
+    feed.addEventListener('click', e => {
+      // Sponsored card tap → series detail
+      const sponsored = e.target.closest('.feed__item');
+      if (sponsored && sponsored.querySelector('.feed__sponsored')) {
+        location.href = './13-series-detail.html?slug=' + vidashort.MockData.sponsored.slug;
+        return;
+      }
+      // Action buttons
+      const action = e.target.closest('[data-action]');
+      if (action) {
+        e.stopPropagation();
+        if (action.dataset.action === 'like') {
+          action.classList.add('is-liked');
+          vidashort.Haptics.tap();
+          vidashort.Toast.show('Added to favorites', 'success');
+        } else if (action.dataset.action === 'comment') {
+          location.href = './15-comments.html?ep=' + (sponsored && sponsored.dataset.epId || '');
+        } else if (action.dataset.action === 'share') {
+          location.href = './16-share-sheet.html';
+        } else if (action.dataset.action === 'cost') {
+          const epId = sponsored && sponsored.dataset.epId;
+          if (epId) location.href = './14-episode-player.html?ep=' + epId;
+        } else if (action.dataset.action === 'creator') {
+          location.href = './13-series-detail.html?slug=' + (vidashort.MockData.sponsored.slug);
+        }
+        return;
+      }
+
+      const now = Date.now();
+      const rect = (sponsored || feed).getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      // double-tap → heart
+      if (now - lastTap < 300) {
+        burstHeart(e.clientX, e.clientY);
+        const heartBtn = sponsored && sponsored.querySelector('[data-action="like"]');
+        if (heartBtn) heartBtn.classList.add('is-liked');
+        vidashort.Haptics.tap();
+        lastTap = 0;
+        return;
+      }
+      lastTap = now;
+      // tap zones
+      if (x > 0.66) feed.scrollBy({ top: feed.clientHeight, behavior: 'smooth' });
+      else if (x < 0.33) feed.scrollBy({ top: -feed.clientHeight, behavior: 'smooth' });
+      else togglePause(sponsored);
+    });
+
+    function burstHeart(x, y) {
+      const el = document.createElement('span');
+      el.className = 'heart-burst';
+      el.style.left = (x - 16) + 'px';
+      el.style.top = (y - 16) + 'px';
+      el.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
+      el.style.setProperty('--dy', -120 - Math.random() * 80 + 'px');
+      el.innerHTML = '<i class="ph-fill ph-heart"></i>';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
+    }
+
+    // Pause / progress simulation
+    const progressTimers = new WeakMap();
+    function startProgress(slide) {
+      stopProgress(slide);
+      const bar = slide.querySelector('[data-prog]');
+      if (!bar) return;
+      let pct = 0;
+      const t = setInterval(() => {
+        pct += 1.2;
+        if (pct >= 100) {
+          pct = 100; bar.style.width = '100%';
+          // Auto-advance: scroll to next slide
+          setTimeout(() => feed.scrollBy({ top: feed.clientHeight, behavior: 'smooth' }), 200);
+          clearInterval(t);
+        } else {
+          bar.style.width = pct + '%';
+        }
+      }, 200);
+      progressTimers.set(slide, t);
+    }
+    function stopProgress(slide) {
+      const t = progressTimers.get(slide);
+      if (t) clearInterval(t);
+    }
+
+    function togglePause(slide) {
+      if (!slide) return;
+      const pause = slide.querySelector('.feed__pause');
+      const bar = slide.querySelector('[data-prog]');
+      if (slide.dataset.paused === '1') {
+        slide.dataset.paused = '0';
+        if (pause) pause.classList.remove('is-show');
+        startProgress(slide);
+      } else {
+        slide.dataset.paused = '1';
+        if (pause) pause.classList.add('is-show');
+        stopProgress(slide);
+        setTimeout(() => pause && pause.classList.remove('is-show'), 600);
+      }
+    }
+
+    // Start progress for the first visible slide
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting && en.intersectionRatio > 0.6) {
+          startProgress(en.target);
+        } else {
+          stopProgress(en.target);
+        }
+      });
+    }, { root: feed, threshold: [0, 0.6, 1] });
+    document.querySelectorAll('.feed__item').forEach(s => observer.observe(s));
+
+    // Dismiss sponsored
+    document.querySelectorAll('[data-dismiss]').forEach(d => d.addEventListener('click', e => {
+      e.stopPropagation();
+      const item = d.closest('.feed__item');
+      if (item) item.style.display = 'none';
+    }));
+  </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Search</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .sr { padding: 0 20px; }
+    .sr__bar { display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: 999px; margin: 12px 0 16px; }
+    .sr__bar i { color: var(--color-text-3); font-size: 18px; }
+    .sr__input { flex: 1; background: transparent; border: none; outline: none; color: var(--color-text-1); font-size: var(--text-sm); }
+    .sr__input::placeholder { color: var(--color-text-3); }
+    .sr__clear { color: var(--color-text-3); font-size: 16px; cursor: pointer; }
+    .sr__section { margin-bottom: 20px; }
+    .sr__section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .sr__section-title h2 { font-weight: 800; font-size: var(--text-sm); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-2); }
+    .sr__section-title a { font-size: 11px; color: var(--color-accent-3); font-weight: 600; cursor: pointer; }
+    .sr__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sr__chips .chip { height: 32px; padding: 0 12px; font-size: 12px; }
+    .sr__recents { display: flex; flex-direction: column; gap: 6px; }
+    .sr__recent { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+    .sr__recent i { color: var(--color-text-3); }
+    .sr__recent-text { flex: 1; font-size: var(--text-sm); color: var(--color-text-2); }
+    .sr__recent-x { color: var(--color-text-3); cursor: pointer; padding: 4px; }
+    .sr__results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .sr__card { position: relative; aspect-ratio: 9/16; border-radius: var(--radius-md); overflow: hidden; background-size: cover; background-position: center; }
+    .sr__card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85) 100%); }
+    .sr__card-title { position: absolute; bottom: 8px; left: 8px; right: 8px; z-index: 1; font-weight: 800; font-size: 12px; color: white; line-height: 1.2; }
+    .sr__card-cat { position: absolute; top: 8px; left: 8px; z-index: 1; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 6px; background: rgba(0,0,0,0.6); border-radius: 4px; color: white; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Search" data-back="true"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="sr">
+      <div class="sr__bar">
+        <i class="ph ph-magnifying-glass"></i>
+        <input class="sr__input" id="q" placeholder="Search series, creators, tags…">
+        <i class="ph ph-x sr__clear" id="clear" style="display:none;"></i>
+      </div>
+
+      <div id="landing">
+        <div class="sr__section">
+          <div class="sr__section-title"><h2>Trending</h2></div>
+          <div class="sr__chips" id="trending"></div>
+        </div>
+        <div class="sr__section">
+          <div class="sr__section-title">
+            <h2>Recent</h2>
+            <a id="clearRecents">Clear all</a>
+          </div>
+          <div class="sr__recents" id="recents"></div>
+        </div>
+      </div>
+
+      <div id="results" style="display:none;">
+        <div class="sr__section">
+          <div class="sr__section-title"><h2 id="rCount">0 results</h2></div>
+          <div class="sr__results" id="resultsGrid"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const q = document.getElementById('q');
+    const clear = document.getElementById('clear');
+    const landing = document.getElementById('landing');
+    const results = document.getElementById('results');
+
+    // Trending
+    document.getElementById('trending').innerHTML = vidashort.MockData.trendingTags.map(t => `<button class="chip" data-q="${t}">${t}</button>`).join('');
+    document.getElementById('trending').addEventListener('click', e => {
+      const c = e.target.closest('.chip');
+      if (!c) return;
+      q.value = c.dataset.q;
+      q.dispatchEvent(new Event('input'));
+    });
+
+    // Recents (from localStorage)
+    const RECENT_KEY = 'vidashort.user.recents';
+    const recents = JSON.parse(localStorage.getItem(RECENT_KEY) || '["CEO Romance","Rebirth Queen","Werewolf"]');
+    function renderRecents() {
+      const el = document.getElementById('recents');
+      if (!recents.length) { el.innerHTML = '<div style="text-align:center; color:var(--color-text-3); font-size:12px; padding:16px 0;">No recent searches.</div>'; return; }
+      el.innerHTML = recents.map(r => `
+        <div class="sr__recent" data-q="${r}">
+          <i class="ph ph-clock-counter-clockwise"></i>
+          <span class="sr__recent-text">${r}</span>
+          <i class="ph ph-x sr__recent-x"></i>
+        </div>
+      `).join('');
+      el.querySelectorAll('.sr__recent').forEach(row => {
+        row.querySelector('.sr__recent-x').addEventListener('click', e => {
+          e.stopPropagation();
+          const idx = recents.indexOf(row.dataset.q);
+          if (idx >= 0) recents.splice(idx, 1);
+          localStorage.setItem(RECENT_KEY, JSON.stringify(recents));
+          renderRecents();
+        });
+        row.addEventListener('click', () => {
+          q.value = row.dataset.q; q.dispatchEvent(new Event('input'));
+        });
+      });
+    }
+    renderRecents();
+    document.getElementById('clearRecents').addEventListener('click', () => {
+      recents.length = 0; localStorage.setItem(RECENT_KEY, '[]'); renderRecents();
+    });
+
+    function doSearch(term) {
+      term = term.toLowerCase().trim();
+      if (!term) { landing.style.display = ''; results.style.display = 'none'; clear.style.display = 'none'; return; }
+      landing.style.display = 'none'; results.style.display = ''; clear.style.display = '';
+      const hits = vidashort.MockData.allSeries.filter(s =>
+        s.title.toLowerCase().includes(term) ||
+        s.category.toLowerCase().includes(term) ||
+        (s.tags || []).some(t => t.toLowerCase().includes(term))
+      );
+      document.getElementById('rCount').textContent = hits.length + ' result' + (hits.length === 1 ? '' : 's');
+      document.getElementById('resultsGrid').innerHTML = hits.map(s => `
+        <a class="sr__card" href="./13-series-detail.html?slug=${s.slug}" style="background-image:url('${s.cover}');">
+          <span class="sr__card-cat">${s.category}</span>
+          <div class="sr__card-title">${s.title}</div>
+        </a>
+      `).join('');
+    }
+
+    q.addEventListener('input', () => doSearch(q.value));
+    clear.addEventListener('click', () => { q.value = ''; q.focus(); doSearch(''); });
+    q.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && q.value) {
+        if (!recents.includes(q.value)) recents.unshift(q.value);
+        recents.length = Math.min(recents.length, 8);
+        localStorage.setItem(RECENT_KEY, JSON.stringify(recents));
+      }
+    });
+  </script>
+</body>
+</html>

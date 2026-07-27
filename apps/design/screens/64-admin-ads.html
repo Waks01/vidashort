@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Ad management</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; }
+    .ad { padding: 0 20px; }
+    .ad__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-xl); padding: 16px 0 4px; }
+    .ad__hero { background: var(--gradient-accent); color: white; border-radius: var(--radius-lg); padding: 20px; margin: 12px 0 16px; }
+    .ad__hero-label { font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; font-weight: 700; }
+    .ad__hero-val { font-weight: 800; font-size: 36px; line-height: 1.1; margin: 4px 0; font-variant-numeric: tabular-nums; }
+    .ad__hero-sub { font-size: var(--text-sm); opacity: 0.85; }
+    .ad__grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+    .ad__kpi { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px 8px; text-align: center; }
+    .ad__kpi-val { font-weight: 800; font-size: var(--text-base); color: var(--color-text-1); font-variant-numeric: tabular-nums; }
+    .ad__kpi-lbl { font-size: 9px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .ad__section { margin: 20px 0 8px; }
+    .ad__section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .ad__section-title h2 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-lg); }
+    .ad__row { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+    .ad__row-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--color-bg-elev-2); display: grid; place-items: center; font-size: 20px; color: var(--color-accent-1); flex-shrink: 0; }
+    .ad__row-icon--paused  { color: var(--color-warning); }
+    .ad__row-icon--rewarded { color: var(--color-gold-1); }
+    .ad__row-body { flex: 1; min-width: 0; }
+    .ad__row-name { font-weight: 700; font-size: var(--text-sm); }
+    .ad__row-sub { font-size: 11px; color: var(--color-text-3); margin-top: 2px; }
+    .ad__row-stat { text-align: right; flex-shrink: 0; }
+    .ad__row-stat-val { font-weight: 800; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+    .ad__row-stat-lbl { font-size: 10px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; }
+    .ad__toggle { width: 40px; height: 24px; border-radius: 999px; background: var(--color-success); position: relative; cursor: pointer; flex-shrink: 0; }
+    .ad__toggle::after { content: ''; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; background: white; }
+    .ad__toggle--off { background: var(--color-bg-elev-2); }
+    .ad__toggle--off::after { right: auto; left: 2px; }
+    .ad__pill { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 4px; }
+    .ad__pill--active   { background: rgba(46, 212, 122, 0.15); color: var(--color-success); }
+    .ad__pill--paused   { background: rgba(255, 182, 72, 0.15); color: var(--color-warning); }
+    .ad__note { padding: 12px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--color-text-2); margin-top: 16px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Ads & monetization"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="ad">
+      <div class="ad__title">Ads</div>
+
+      <div class="ad__hero">
+        <div class="ad__hero-label">Ad revenue (7d)</div>
+        <div class="ad__hero-val" id="adRev">₦0</div>
+        <div class="ad__hero-sub" id="adSub">From 0 impressions</div>
+      </div>
+
+      <div class="ad__grid">
+        <div class="ad__kpi"><div class="ad__kpi-val" id="served">0</div><div class="ad__kpi-lbl">Served</div></div>
+        <div class="ad__kpi"><div class="ad__kpi-val" id="capHits">0</div><div class="ad__kpi-lbl">Cap hits</div></div>
+        <div class="ad__kpi"><div class="ad__kpi-val" id="fillRate">0%</div><div class="ad__kpi-lbl">Fill rate</div></div>
+      </div>
+
+      <div class="ad__section">
+        <div class="ad__section-title">
+          <h2>Active campaigns</h2>
+        </div>
+        <div id="list"></div>
+      </div>
+
+      <div class="ad__note">
+        <strong>Daily ad cap:</strong> Users can watch max <strong>100 rewarded ads/day</strong> to earn coins. Pacing is automatic — no manual override available. To change the cap, contact engineering.
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    if (vidashort.Storage.getRole() !== 'admin') vidashort.Storage.setRole('admin');
+    const K = vidashort.MockData.adminKpis;
+    document.getElementById('adRev').textContent = '₦' + K.adRevenueNaira.toLocaleString();
+    document.getElementById('adSub').textContent = `From ${K.adsServed.toLocaleString()} impressions`;
+    document.getElementById('served').textContent = K.adsServed >= 1_000_000 ? (K.adsServed/1_000_000).toFixed(1) + 'M' : (K.adsServed/1000).toFixed(0) + 'K';
+    document.getElementById('capHits').textContent = K.adCapHits.toLocaleString();
+    document.getElementById('fillRate').textContent = '94%';
+
+    const list = document.getElementById('list');
+    list.innerHTML = vidashort.MockData.adCampaigns.map(c => {
+      const icon = c.type === 'rewarded' ? 'gift' : c.type === 'interstitial' ? 'play-circle' : 'megaphone';
+      const iconClass = c.type === 'rewarded' ? 'ad__row-icon--rewarded' : (c.status === 'paused' ? 'ad__row-icon--paused' : '');
+      const fillPct = c.dailyCap ? Math.round((c.delivered / c.dailyCap) * 100) : null;
+      return `
+        <div class="ad__row">
+          <div class="ad__row-icon ${iconClass}"><i class="ph-fill ph-${icon}"></i></div>
+          <div class="ad__row-body">
+            <div class="ad__row-name">${c.advertiser} <span class="ad__pill ad__pill--${c.status}">${c.status}</span></div>
+            <div class="ad__row-sub">${c.type} • ${c.startDate} → ${c.endDate}</div>
+            <div class="ad__row-sub">${c.delivered.toLocaleString()} delivered${fillPct != null ? ` (${fillPct}% of cap)` : ''}</div>
+          </div>
+          <div class="ad__row-stat">
+            <div class="ad__row-stat-val">₦${c.payoutNairaPerView.toFixed(2)}</div>
+            <div class="ad__row-stat-lbl">per view</div>
+          </div>
+          <div class="ad__toggle ${c.status === 'paused' ? 'ad__toggle--off' : ''}" data-id="${c.id}"></div>
+        </div>
+      `;
+    }).join('');
+
+    list.querySelectorAll('.ad__toggle').forEach(t => t.addEventListener('click', () => {
+      t.classList.toggle('ad__toggle--off');
+      vidashort.Haptics.tap();
+      vidashort.Toast.show(t.classList.contains('ad__toggle--off') ? 'Campaign paused' : 'Campaign resumed', 'info');
+    }));
+  </script>
+</body>
+</html>

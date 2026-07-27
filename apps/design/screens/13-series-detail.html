@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Series</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 0; overflow-y: auto; }
+    .sd__backdrop { height: 360px; background-size: cover; background-position: center; position: relative; }
+    .sd__backdrop::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,6,8,0.4) 0%, rgba(10,6,8,0.95) 75%, var(--color-bg) 100%); }
+    .sd__back-body { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 20px 20px; z-index: 1; }
+    .sd__cat { display: inline-block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 10px; background: var(--gradient-accent); border-radius: 999px; color: white; margin-bottom: 8px; }
+    .sd__title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 28px; line-height: 1.1; margin-bottom: 6px; }
+    .sd__meta { display: flex; gap: 10px; font-size: 11px; color: var(--color-text-2); }
+    .sd__meta b { color: var(--color-gold-1); }
+    .sd__body { padding: 0 20px 32px; }
+    .sd__creator { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin: 12px 0; }
+    .sd__creator-avatar { width: 40px; height: 40px; border-radius: 50%; background-size: cover; border: 1px solid var(--color-accent-1); }
+    .sd__creator-name { font-weight: 800; font-size: 13px; }
+    .sd__creator-handle { font-size: 11px; color: var(--color-text-3); }
+    .sd__syn { color: var(--color-text-2); font-size: 13px; line-height: 1.55; margin: 12px 0 16px; }
+    .sd__cta-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .sd__cta-row .btn { flex: 1; }
+    .sd__ep-title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-md); margin: 8px 0; }
+    .sd__ep-list { display: flex; flex-direction: column; gap: 6px; }
+    .sd__ep-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; transition: background var(--duration-fast); }
+    .sd__ep-row:hover { background: var(--color-bg-elev-2); }
+    .sd__ep-row--locked { opacity: 0.6; }
+    .sd__ep-num { width: 30px; height: 30px; border-radius: 50%; background: var(--color-bg-elev-2); display: grid; place-items: center; font-weight: 800; font-size: 12px; color: var(--color-text-2); flex-shrink: 0; }
+    .sd__ep-row--watched .sd__ep-num { background: var(--gradient-gold); color: #1a0e00; }
+    .sd__ep-row--locked .sd__ep-num { color: var(--color-text-3); }
+    .sd__ep-body { flex: 1; min-width: 0; }
+    .sd__ep-name { font-weight: 700; font-size: 13px; }
+    .sd__ep-sub { font-size: 11px; color: var(--color-text-3); margin-top: 2px; }
+    .sd__ep-price { font-size: 11px; font-weight: 800; color: var(--color-gold-1); display: inline-flex; align-items: center; gap: 4px; }
+    .sd__ep-icon { font-size: 20px; color: var(--color-text-2); }
+    .sd__ad { margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="" data-back="true"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div id="root"></div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const slug = params.get('slug') || vidashort.MockData.allSeries[0].slug;
+    const series = vidashort.MockData.allSeries.find(s => s.slug === slug) || vidashort.MockData.allSeries[0];
+
+    const root = document.getElementById('root');
+    root.innerHTML = `
+      <div class="sd__backdrop" style="background-image:url('${series.backdrop || series.cover}');">
+        <div class="sd__back-body">
+          <div class="sd__cat">${series.category}</div>
+          <div class="sd__title">${series.title}</div>
+          <div class="sd__meta">
+            <span><b>★</b> ${series.rating || '4.5'}</span>
+            <span>${series.totalEpisodes} episodes</span>
+            <span>${series.year || '2026'}</span>
+            <span>${series.language || 'English'}</span>
+          </div>
+        </div>
+      </div>
+      <div class="sd__body">
+        <div class="sd__creator">
+          <div class="sd__creator-avatar" style="background-image:url('${series.creator ? series.creator.avatar : series.cover}');"></div>
+          <div>
+            <div class="sd__creator-name">${series.creator ? series.creator.name : 'vidashort'}</div>
+            <div class="sd__creator-handle">${series.creator ? '@'+series.creator.handle : '@vidashort'}</div>
+          </div>
+        </div>
+        <div class="sd__syn">${series.synopsis}</div>
+        <div class="sd__cta-row">
+          <a class="btn btn-primary" href="./14-episode-player.html?ep=${series.id}-1"><i class="ph-fill ph-play"></i> Start watching</a>
+          <a class="btn btn-secondary" href="./16-share-sheet.html"><i class="ph-bold ph-share-network"></i> Share</a>
+        </div>
+        <div class="sd__ep-title">Episodes</div>
+        <div class="sd__ep-list" id="epList"></div>
+        <div class="ad-banner sd__ad">
+          <span class="ad-banner__pill">Sponsored</span>
+          <div class="ad-banner__title">Install <span>Acme VPN</span> — Free for 7 days</div>
+          <button class="ad-banner__cta">Install</button>
+        </div>
+      </div>
+    `;
+
+    const epList = document.getElementById('epList');
+    epList.innerHTML = series.episodes.map((e, i) => {
+      const watched = i === 0; // demo: first ep already watched
+      const locked = i > 0 && !vidashort.Storage.isVIP() && vidashort.Storage.getCoins() < e.requiredCoins;
+      return `
+        <a class="sd__ep-row ${watched ? 'sd__ep-row--watched' : ''} ${locked ? 'sd__ep-row--locked' : ''}" href="./14-episode-player.html?ep=${series.id}-${e.number}">
+          <div class="sd__ep-num">${watched ? '<i class="ph-fill ph-check"></i>' : e.number}</div>
+          <div class="sd__ep-body">
+            <div class="sd__ep-name">Ep ${e.number} — ${e.title}</div>
+            <div class="sd__ep-sub">${e.duration}s • ${e.synopsis || 'A new chapter unfolds…'}</div>
+          </div>
+          ${locked ? '<div class="sd__ep-price"><i class="ph-fill ph-coins"></i> ' + e.requiredCoins + '</div>' : (watched ? '' : '<i class="ph-fill ph-play sd__ep-icon" style="color:var(--color-accent-1);"></i>')}
+        </a>
+      `;
+    }).join('');
+  </script>
+</body>
+</html>

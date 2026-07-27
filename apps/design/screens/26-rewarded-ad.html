@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Rewarded ad</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding: 0; overflow: hidden; background: #000; }
+    .ra { position: fixed; inset: 0; display: flex; flex-direction: column; }
+    .ra__stage { flex: 1; position: relative; background: linear-gradient(135deg, #1a0033 0%, #4a0e6b 50%, #6b1a8a 100%); background-size: 200% 200%; animation: ra-shift 8s ease-in-out infinite; display: grid; place-items: center; }
+    @keyframes ra-shift { 0%,100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
+    .ra__stage::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 100%); }
+    .ra__sponsored { position: absolute; top: 16px; left: 16px; padding: 4px 10px; background: rgba(0,0,0,0.6); border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: white; }
+    .ra__x { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.6); display: grid; place-items: center; color: white; font-size: 16px; cursor: pointer; }
+    .ra__countdown { position: absolute; top: 16px; right: 60px; padding: 6px 10px; background: rgba(0,0,0,0.6); border-radius: 999px; color: white; font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .ra__art { position: relative; z-index: 1; text-align: center; padding: 24px; }
+    .ra__logo { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 42px; color: white; }
+    .ra__tagline { color: rgba(255,255,255,0.85); font-size: 14px; margin-top: 4px; }
+    .ra__install { margin-top: 20px; padding: 12px 24px; background: white; color: #6b1a8a; border-radius: 999px; font-weight: 800; font-size: 13px; display: inline-block; }
+    .ra__loading { position: relative; z-index: 1; text-align: center; color: white; }
+    .ra__loading i { font-size: 48px; animation: spin 1.2s linear infinite; }
+    .ra__loading p { margin-top: 12px; font-size: 12px; }
+    .ra__complete { text-align: center; color: white; padding: 24px; }
+    .ra__complete i { font-size: 80px; color: var(--color-gold-1); }
+    .ra__complete h2 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 28px; margin-top: 12px; }
+    .ra__complete p { font-size: 14px; margin-top: 6px; }
+    .ra__reward { display: inline-block; margin-top: 16px; padding: 14px 24px; background: var(--gradient-gold); color: #1a0e00; border-radius: 999px; font-weight: 800; font-size: 16px; }
+    .ra__bottom { background: var(--color-bg-elev-1); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--color-border); }
+    .ra__reward-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(255,226,122,0.15); border: 1px solid var(--color-gold-2); border-radius: 999px; color: var(--color-gold-1); font-weight: 800; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="ra">
+    <div class="ra__stage" id="stage">
+      <div class="ra__sponsored">Sponsored</div>
+      <div class="ra__x" id="x"><i class="ph-bold ph-x"></i></div>
+      <div class="ra__countdown" id="cd"></div>
+
+      <div class="ra__loading" id="loading">
+        <i class="ph-bold ph-circle-notch"></i>
+        <p>Loading ad…</p>
+      </div>
+
+      <div class="ra__art" id="art" style="display:none;">
+        <div class="ra__logo">Acme VPN</div>
+        <div class="ra__tagline">Free for 7 days. Cancel anytime.</div>
+        <a class="ra__install">Install now</a>
+      </div>
+
+      <div class="ra__complete" id="complete" style="display:none;">
+        <i class="ph-fill ph-check-circle"></i>
+        <h2>+20 coins</h2>
+        <p>Thanks for watching!</p>
+      </div>
+    </div>
+    <div class="ra__bottom">
+      <div class="ra__reward-pill"><i class="ph-fill ph-coins"></i> +20 coins</div>
+      <div style="font-size:11px; color:var(--color-text-3);">Up to 100 ads/day</div>
+    </div>
+  </div>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const cd = document.getElementById('cd');
+    const loading = document.getElementById('loading');
+    const art = document.getElementById('art');
+    const complete = document.getElementById('complete');
+    let total = 15;
+    function fmt(s) { return 'Skip in ' + s + 's'; }
+
+    // Phase 1: loading (1.5s)
+    cd.textContent = '';
+    setTimeout(() => {
+      loading.style.display = 'none';
+      art.style.display = '';
+      // Phase 2: playing
+      const iv = setInterval(() => {
+        total -= 1;
+        cd.textContent = fmt(Math.max(0, total));
+        if (total <= 0) {
+          clearInterval(iv);
+          cd.textContent = '';
+          art.style.display = 'none';
+          complete.style.display = '';
+          vidashort.Storage.setCoins(vidashort.Storage.getCoins() + 20);
+          vidashort.AdCap.record();
+          vidashort.Confetti.burst({ count: 60 });
+          vidashort.Haptics.tap();
+          setTimeout(() => {
+            const from = new URLSearchParams(location.search).get('from');
+            if (from === 'paywall') history.back();
+            else history.back();
+          }, 1400);
+        }
+      }, 1000);
+    }, 1500);
+
+    document.getElementById('x').addEventListener('click', () => {
+      vidashort.Toast.show('Ad cancelled — no reward', 'info');
+      history.back();
+    });
+  </script>
+</body>
+</html>

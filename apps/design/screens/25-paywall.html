@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Unlock</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding: 0; overflow: hidden; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
+    .pw { position: fixed; inset: 0; display: grid; place-items: center; z-index: 200; }
+    .pw__card { width: 92%; max-width: 360px; background: var(--color-bg-elev-2); border-radius: 24px; box-shadow: var(--shadow-modal); border: 1px solid var(--color-border); overflow: hidden; animation: pw-in 200ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes pw-in { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .pw__head { padding: 24px 20px 8px; text-align: center; position: relative; }
+    .pw__head::before { content: ''; position: absolute; inset: 0; background: var(--gradient-accent-hot); opacity: 0.12; }
+    .pw__icon { width: 56px; height: 56px; border-radius: 50%; background: var(--gradient-accent); display: grid; place-items: center; margin: 0 auto 12px; font-size: 28px; color: white; box-shadow: var(--glow-magenta); position: relative; }
+    .pw__title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 26px; line-height: 1.1; position: relative; }
+    .pw__sub { color: var(--color-text-2); font-size: 13px; margin-top: 6px; position: relative; }
+    .pw__urgency { display: inline-block; margin: 12px auto 0; padding: 4px 12px; background: rgba(255, 31, 90, 0.2); border: 1px solid var(--color-accent-1); border-radius: 999px; color: var(--color-accent-3); font-size: 11px; font-weight: 800; letter-spacing: 0.04em; position: relative; }
+    .pw__balance { margin: 16px 20px 0; padding: 12px; background: var(--color-bg-elev-1); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; font-size: 12px; position: relative; }
+    .pw__balance b { font-weight: 800; color: var(--color-gold-1); font-variant-numeric: tabular-nums; }
+    .pw__body { padding: 16px 20px 20px; }
+    .pw__cta { display: block; width: 100%; padding: 14px; border-radius: 999px; font-weight: 800; font-size: 13px; text-align: center; margin-bottom: 10px; }
+    .pw__cta--primary { background: var(--gradient-accent); color: white; box-shadow: var(--glow-magenta); }
+    .pw__cta--secondary { background: transparent; color: var(--color-accent-3); border: 1px solid var(--color-accent-2); }
+    .pw__cta--tertiary { background: var(--gradient-gold); color: #1a0e00; font-size: 12px; padding: 12px; }
+    .pw__cta--tertiary small { display: block; font-size: 10px; opacity: 0.7; font-weight: 600; }
+    .pw__fine { font-size: 10px; color: var(--color-text-3); line-height: 1.5; text-align: center; margin-top: 8px; }
+    .pw__close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); display: grid; place-items: center; color: white; font-size: 16px; z-index: 1; cursor: pointer; }
+    .pw__ad-cap { margin: 0 20px 8px; padding: 8px 12px; background: rgba(255, 200, 80, 0.12); border: 1px solid var(--color-gold-3); border-radius: var(--radius-sm); font-size: 11px; color: var(--color-gold-1); text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="pw">
+    <div class="pw__card">
+      <i class="ph-bold ph-x pw__close" id="close"></i>
+      <div class="pw__head">
+        <div class="pw__icon"><i class="ph-fill ph-lock-key"></i></div>
+        <div class="pw__title">Unlock the next<br>episode</div>
+        <div class="pw__sub">Use coins, watch a quick ad, or go VIP.</div>
+        <div class="pw__urgency" id="urgency">🔥 Special offer — 50 coins for ₦1,000</div>
+      </div>
+      <div class="pw__balance">
+        <span>You have</span>
+        <b id="bal">0 coins</b>
+      </div>
+      <div class="pw__ad-cap" id="adCap" style="display:none;">Daily ad cap reached (100/100). Try again tomorrow or go VIP.</div>
+      <div class="pw__body">
+        <a class="pw__cta pw__cta--primary" id="buyCta"><i class="ph-fill ph-coins"></i> Get 50 coins — ₦1,000</a>
+        <a class="pw__cta pw__cta--secondary" id="adCta"><i class="ph-bold ph-play-circle"></i> Watch a quick ad for +20 coins</a>
+        <a class="pw__cta pw__cta--tertiary" href="./23-vip.html"><i class="ph-fill ph-crown"></i> Go VIP — unlimited drama<small>From ₦500/week</small></a>
+        <div class="pw__fine">Payment is charged to your Apple/Google account. Cancel anytime in Settings.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const coins = vidashort.Storage.getCoins();
+    const cost = vidashort.ECONOMY.episodeCostCoins;
+    document.getElementById('bal').textContent = coins.toLocaleString() + ' coins';
+
+    // Disable the watch-ad CTA if at cap
+    const adCap = vidashort.AdCap.atCap();
+    if (adCap) {
+      document.getElementById('adCta').style.opacity = 0.4;
+      document.getElementById('adCta').style.pointerEvents = 'none';
+      document.getElementById('adCap').style.display = '';
+    }
+
+    // Urgency countdown (1 hour for demo)
+    let seconds = 60 * 60;
+    const urgency = document.getElementById('urgency');
+    function tick() {
+      if (seconds <= 0) return;
+      seconds -= 1;
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      urgency.textContent = `🔥 Offer ends in ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    setInterval(tick, 1000);
+
+    document.getElementById('close').addEventListener('click', () => history.back());
+
+    document.getElementById('buyCta').addEventListener('click', e => {
+      e.preventDefault();
+      location.href = './22-coin-store.html';
+    });
+
+    document.getElementById('adCta').addEventListener('click', e => {
+      e.preventDefault();
+      if (vidashort.AdCap.atCap()) {
+        vidashort.Toast.show('Daily ad cap reached', 'error');
+        return;
+      }
+      location.href = './26-rewarded-ad.html?from=paywall';
+    });
+  </script>
+</body>
+</html>

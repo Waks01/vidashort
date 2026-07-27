@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  splash-logo.svg — STOPGAP reconstruction.
+  Brand spec: docs/brand/00-overview.md § 9.
+
+  Composition: full app icon (1024×1024 V+play) on the left + wordmark on
+  the right + tagline below. Icon is rendered inline at scale 0.2734 so its
+  V+play geometry matches app-icon.svg byte-for-byte (just smaller).
+
+  Wordmark text uses <text> with a Google Fonts @import so the prototype
+  browser (which already loads Playfair Display via docs/brand/10-typography.md)
+  renders the wordmark correctly. The sharp + librsvg rasterizer used by
+  mobile/scripts/generate-icons.mjs does NOT fetch web fonts and will fall
+  back to Georgia for the wordmark — that's the documented "known limitation"
+  in mobile/assets/exports/README.md. Until the wordmark is baked to <path>
+  by a real vector editor (Inkscape/Figma/Illustrator), PNG exports of this
+  splash will not show the wordmark.
+
+  TODO(brand): replace this with a real Figma source. Once the wordmark is
+  baked, save it as splash-logo.baked.svg and the generator will pick it up
+  automatically. See mobile/scripts/generate-icons.mjs:resolveSource().
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 426" width="1280" height="426">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,800;0,900;1,800;1,900&amp;family=Inter:wght@400;700&amp;display=swap');
+      .wordmark-vida  { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-style: italic; fill: #f5e9d4; }
+      .wordmark-short { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-style: italic; fill: #f5e9d4; font-size: 0.75em; }
+      .tagline        { font-family: 'Inter', -apple-system, sans-serif; font-weight: 700; font-style: normal; fill: #6b5a4d; letter-spacing: 0.18em; text-transform: uppercase; }
+    </style>
+
+    <!-- App icon background gradient (light pink → magenta → crimson) -->
+    <linearGradient id="splash-icon-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#ff4d80"/>
+      <stop offset="55%" stop-color="#ff1f5a"/>
+      <stop offset="100%" stop-color="#b3002b"/>
+    </linearGradient>
+
+    <!-- White halo radial behind the V glyph -->
+    <radialGradient id="splash-icon-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- V+play front face gradient -->
+    <linearGradient id="splash-icon-front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ff4d80"/>
+      <stop offset="50%" stop-color="#ff1f5a"/>
+      <stop offset="100%" stop-color="#b3002b"/>
+    </linearGradient>
+
+    <!-- 3D extrude side (darker, for depth on the V's back face) -->
+    <linearGradient id="splash-icon-side" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#7a001e"/>
+      <stop offset="100%" stop-color="#4a0014"/>
+    </linearGradient>
+
+    <!-- Top-edge highlight on each V arm -->
+    <linearGradient id="splash-icon-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#fff5c4" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff4d80" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Gold rim light on the V's inner edge -->
+    <linearGradient id="splash-icon-rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffe27a"/>
+      <stop offset="100%" stop-color="#d4a017"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full app icon embedded at scale 0.2734 (280×280 from a 1024×1024 source).
+       Geometry exactly mirrors app-icon.svg; only transform changes. -->
+  <g transform="translate(80, 73) scale(0.2734)">
+    <!-- Rounded-square background (rx=220 in 1024-space; ~60 in rendered space) -->
+    <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="url(#splash-icon-bg)"/>
+    <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="url(#splash-icon-halo)"/>
+
+    <!-- V+play back face (offset slightly down-right for 3D extrude) -->
+    <g opacity="0.85">
+      <path d="M 260 290 L 410 290 L 512 600 L 614 290 L 764 290 L 614 740 L 512 740 Z" fill="url(#splash-icon-side)"/>
+      <path d="M 614 290 L 820 460 L 820 540 L 614 740 Z" fill="url(#splash-icon-side)"/>
+    </g>
+
+    <!-- V+play front face -->
+    <path d="M 260 290 L 410 290 L 512 600 L 614 290 L 764 290 L 614 740 L 512 740 Z" fill="url(#splash-icon-front)"/>
+
+    <!-- Top-edge highlights on both arms of the V -->
+    <path d="M 260 290 L 410 290 L 418 310 L 268 310 Z" fill="url(#splash-icon-top)"/>
+    <path d="M 614 290 L 764 290 L 758 310 L 622 310 Z" fill="url(#splash-icon-top)"/>
+
+    <!-- Gold rim light down the inner V crease -->
+    <path d="M 410 290 L 512 600 L 514 600 L 414 290 Z" fill="url(#splash-icon-rim)" opacity="0.55"/>
+
+    <!-- Play triangle (right arm of V extends into a play button) -->
+    <path d="M 614 290 L 820 460 L 820 540 L 614 740 Z" fill="url(#splash-icon-front)"/>
+    <path d="M 614 290 L 820 460 L 818 470 L 622 310 Z" fill="url(#splash-icon-top)"/>
+  </g>
+
+  <!-- "vida" — Playfair 800 italic, cream text.
+       Sized to clear the icon (rightmost x=360) with a 60px gap. -->
+  <text x="420" y="270" class="wordmark-vida" font-size="200">vida</text>
+
+  <!-- "short" — same font, ~75% size. Starts ~20px after 'vida' ends (~x=780). -->
+  <text x="800" y="270" class="wordmark-short" font-size="150">short</text>
+
+  <!-- Tagline — Inter 700, uppercase, widest tracking.
+       Centered under the wordmark area (starts at x≈420, ends near x≈1137). -->
+  <text x="500" y="350" class="tagline" font-size="20">Endless Drama · One Swipe</text>
+</svg>

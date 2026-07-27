@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Loading state</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .ld { padding: 0 20px 24px; }
+    .ld__group { margin-bottom: 32px; }
+    .ld__group h2 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-md); margin-bottom: 12px; padding: 0 4px; }
+    .sk { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; }
+    .sk__row { display: flex; gap: 12px; margin-bottom: 12px; }
+    .sk__row:last-child { margin-bottom: 0; }
+    .sk__square { width: 72px; aspect-ratio: 9/16; border-radius: var(--radius-sm); }
+    .sk__line { height: 12px; border-radius: 4px; margin-bottom: 6px; }
+    .sk__line--sm { width: 40%; }
+    .sk__line--md { width: 70%; }
+    .sk__line--lg { width: 100%; }
+    .sk__block { height: 200px; border-radius: var(--radius-md); margin-bottom: 12px; }
+
+    .sk__feed { display: flex; gap: 8px; overflow: hidden; }
+    .sk__feed > div { width: 160px; aspect-ratio: 9/16; border-radius: var(--radius-md); flex-shrink: 0; }
+
+    .sk__profile { display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+    .sk__avatar { width: 84px; height: 84px; border-radius: 50%; margin-bottom: 12px; }
+
+    .shimmer { position: relative; overflow: hidden; background: var(--color-bg-elev-2); }
+    .shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%); animation: shimmer 1.5s linear infinite; }
+    @keyframes shimmer { from { transform: translateX(200%); } to { transform: translateX(-200%); } }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Loading states"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="ld">
+      <div class="ld__group">
+        <h2>1. Home feed loading</h2>
+        <div class="sk">
+          <div class="sk__feed">
+            <div class="shimmer"></div>
+            <div class="shimmer"></div>
+            <div class="shimmer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ld__group">
+        <h2>2. Series detail loading</h2>
+        <div class="sk">
+          <div class="sk__block shimmer"></div>
+          <div class="sk__line sk__line--md shimmer"></div>
+          <div class="sk__line sk__line--lg shimmer"></div>
+          <div class="sk__line sk__line--sm shimmer"></div>
+          <div style="height:8px;"></div>
+          <div class="sk__row">
+            <div class="sk__square shimmer"></div>
+            <div style="flex:1;">
+              <div class="sk__line sk__line--md shimmer"></div>
+              <div class="sk__line sk__line--sm shimmer"></div>
+            </div>
+          </div>
+          <div class="sk__row">
+            <div class="sk__square shimmer"></div>
+            <div style="flex:1;">
+              <div class="sk__line sk__line--md shimmer"></div>
+              <div class="sk__line sk__line--sm shimmer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ld__group">
+        <h2>3. Profile loading</h2>
+        <div class="sk">
+          <div class="sk__profile">
+            <div class="sk__avatar shimmer"></div>
+            <div class="sk__line sk__line--md shimmer" style="width:120px;"></div>
+            <div class="sk__line sk__line--sm shimmer" style="width:80px;"></div>
+          </div>
+          <div class="sk__row" style="margin-top:16px;">
+            <div class="sk__line sk__line--lg shimmer"></div>
+          </div>
+          <div class="sk__row">
+            <div class="sk__line sk__line--lg shimmer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ld__group">
+        <h2>4. Search results loading</h2>
+        <div class="sk" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div class="shimmer" style="aspect-ratio:9/16; border-radius:var(--radius-md);"></div>
+          <div class="shimmer" style="aspect-ratio:9/16; border-radius:var(--radius-md);"></div>
+          <div class="shimmer" style="aspect-ratio:9/16; border-radius:var(--radius-md);"></div>
+          <div class="shimmer" style="aspect-ratio:9/16; border-radius:var(--radius-md);"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+</body>
+</html>

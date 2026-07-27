@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Player</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    html, body { padding: 0; margin: 0; height: 100%; overflow: hidden; background: #000; }
+    .player { position: relative; width: 100%; height: 100%; background: #000; overflow: hidden; }
+
+    /* Faux video: animated gradient + grain */
+    .player__bg { position: absolute; inset: 0; background: linear-gradient(135deg, #4a0014, var(--color-accent-1), var(--color-accent-2)); background-size: 220% 220%; animation: drift 14s ease-in-out infinite; }
+    .player__bg::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E"); mix-blend-mode: overlay; opacity: 0.55; }
+    .player__bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%); }
+    @keyframes drift { 0%,100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
+
+    /* Top bar */
+    .player__top { position: absolute; top: 0; left: 0; right: 0; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; z-index: 5; background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, transparent 100%); opacity: 0; transition: opacity 200ms; }
+    .player.is-controls .player__top { opacity: 1; }
+    .player__back { width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.4); display: grid; place-items: center; color: white; font-size: 18px; cursor: pointer; }
+    .player__top-meta { color: white; font-size: 12px; text-align: center; }
+    .player__top-meta b { display: block; font-weight: 800; }
+    .player__more { width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.4); display: grid; place-items: center; color: white; font-size: 18px; cursor: pointer; }
+
+    /* Center play/pause indicator */
+    .player__center { position: absolute; inset: 0; display: grid; place-items: center; z-index: 4; pointer-events: none; opacity: 0; transition: opacity 150ms; }
+    .player.is-paused .player__center { opacity: 1; }
+    .player__center i { font-size: 80px; color: rgba(255,255,255,0.9); }
+
+    /* Right action column */
+    .player__right { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 22px; z-index: 4; opacity: 0; transition: opacity 200ms; }
+    .player.is-controls .player__right { opacity: 1; }
+    .player__action { display: flex; flex-direction: column; align-items: center; gap: 4px; color: white; }
+    .player__action-bubble { width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.4); display: grid; place-items: center; font-size: 22px; }
+    .player__action-count { font-size: 10px; font-weight: 700; }
+    .player__action--heart.is-liked .player__action-bubble { color: var(--color-accent-1); }
+
+    /* Bottom info + scrub */
+    .player__bottom { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 18px 18px; z-index: 4; opacity: 0; transition: opacity 200ms; }
+    .player.is-controls .player__bottom { opacity: 1; }
+    .player__title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 18px; color: white; margin-bottom: 2px; }
+    .player__ep { color: rgba(255,255,255,0.85); font-size: 12px; margin-bottom: 10px; }
+    .player__scrub { height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; margin-bottom: 6px; position: relative; }
+    .player__scrub-fill { height: 100%; background: var(--gradient-gold); width: 0; transition: width 200ms linear; }
+    .player__times { display: flex; justify-content: space-between; color: rgba(255,255,255,0.7); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+    /* Up-next carousel */
+    .player__upnext { position: absolute; left: 0; right: 0; bottom: 88px; padding: 0 18px; z-index: 3; }
+    .player__upnext-title { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+    .player__upnext-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+    .player__upnext-row::-webkit-scrollbar { display: none; }
+    .player__upnext-card { flex: 0 0 96px; aspect-ratio: 9/16; border-radius: var(--radius-sm); background-size: cover; background-position: center; position: relative; }
+    .player__upnext-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.7) 100%); border-radius: var(--radius-sm); }
+    .player__upnext-card-ep { position: absolute; bottom: 4px; left: 6px; right: 6px; z-index: 1; color: white; font-size: 9px; font-weight: 800; }
+
+    /* Pre-roll / mid-roll ad overlays */
+    .player__ad { position: absolute; left: 16px; right: 16px; bottom: 130px; background: rgba(0,0,0,0.85); border: 1px solid var(--color-accent-2); border-radius: var(--radius-md); padding: 10px 12px; display: flex; align-items: center; gap: 10px; z-index: 6; }
+    .player__ad-label { font-size: 9px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-3); }
+    .player__ad-title { color: white; font-size: 12px; font-weight: 700; flex: 1; }
+    .player__ad-cta { padding: 6px 10px; background: var(--gradient-accent); color: white; border-radius: 999px; font-size: 10px; font-weight: 800; }
+    .player__ad-x { color: rgba(255,255,255,0.6); padding: 4px; cursor: pointer; }
+
+    /* Next-episode countdown */
+    .player__next { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); padding: 8px 16px; background: rgba(0,0,0,0.75); border: 1px solid var(--color-gold-2); border-radius: 999px; color: var(--color-gold-1); font-size: 12px; font-weight: 800; z-index: 4; opacity: 0; transition: opacity 200ms; }
+    .player.is-ending .player__next { opacity: 1; }
+
+    .player__loading { position: absolute; inset: 0; display: grid; place-items: center; z-index: 2; color: rgba(255,255,255,0.5); }
+    .player__loading i { font-size: 32px; animation: spin 1.2s linear infinite; }
+    @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+    /* Hidden heart-burst on double-tap */
+    .player__heart { position: absolute; z-index: 7; font-size: 60px; color: var(--color-accent-1); pointer-events: none; animation: heart-burst 800ms ease-out forwards; }
+    @keyframes heart-burst { 0% { transform: scale(0.5); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="" data-back="true"></div>
+  <div id="chrome-bottomnav" style="display:none;"></div>
+
+  <main class="screen" data-direction="forward" style="padding:0;">
+    <div class="player" id="player">
+      <div class="player__bg" id="bg"></div>
+      <div class="player__loading"><i class="ph-bold ph-circle-notch"></i></div>
+
+      <div class="player__top">
+        <div class="player__back" id="back"><i class="ph-bold ph-caret-left"></i></div>
+        <div class="player__top-meta"><b id="seriesName">Series</b><span id="epMeta">Episode 1</span></div>
+        <div class="player__more"><i class="ph-bold ph-dots-three-vertical"></i></div>
+      </div>
+
+      <div class="player__center"><i class="ph-fill ph-play"></i></div>
+
+      <div class="player__right">
+        <div class="player__action player__action--heart" id="likeBtn">
+          <div class="player__action-bubble"><i class="ph-bold ph-heart"></i></div>
+          <div class="player__action-count" id="likeCount">1.2K</div>
+        </div>
+        <div class="player__action" id="commentBtn">
+          <div class="player__action-bubble"><i class="ph-bold ph-chat-circle"></i></div>
+          <div class="player__action-count">87</div>
+        </div>
+        <div class="player__action" id="shareBtn">
+          <div class="player__action-bubble"><i class="ph-bold ph-share-network"></i></div>
+          <div class="player__action-count">Share</div>
+        </div>
+        <div class="player__action" id="costBtn">
+          <div class="player__action-bubble" id="costBubble"><i class="ph-fill ph-coins"></i></div>
+          <div class="player__action-count" id="costLabel">25</div>
+        </div>
+      </div>
+
+      <div class="player__upnext">
+        <div class="player__upnext-title">Up next</div>
+        <div class="player__upnext-row" id="upnext"></div>
+      </div>
+
+      <div class="player__bottom">
+        <div class="player__title" id="title">Episode title</div>
+        <div class="player__ep" id="syn">A new chapter unfolds…</div>
+        <div class="player__scrub"><div class="player__scrub-fill" id="scrub"></div></div>
+        <div class="player__times"><span id="curTime">0:00</span><span id="durTime">1:30</span></div>
+      </div>
+
+      <div class="player__next" id="nextToast">Next episode in 3…</div>
+      <div class="player__ad" id="preroll" style="display:none;">
+        <div>
+          <div class="player__ad-label">Sponsored</div>
+          <div class="player__ad-title">The CEO's Forbidden Bride</div>
+        </div>
+        <a class="player__ad-cta" href="#">Watch</a>
+        <i class="ph ph-x player__ad-x" id="prerollX"></i>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    // Resolve episode
+    const params = new URLSearchParams(location.search);
+    const epId = params.get('ep') || '1-1';
+    const [seriesId, epNum] = epId.split('-').map(s => parseInt(s, 10));
+    const series = vidashort.MockData.allSeries.find(s => s.id === seriesId) || vidashort.MockData.allSeries[0];
+    const episode = series.episodes.find(e => e.number === epNum) || series.episodes[0];
+
+    document.getElementById('seriesName').textContent = series.title;
+    document.getElementById('epMeta').textContent = `Episode ${episode.number} • ${episode.duration}s`;
+    document.getElementById('title').textContent = episode.title || `Episode ${episode.number}`;
+    document.getElementById('syn').textContent = episode.synopsis || '';
+    document.getElementById('durTime').textContent = Math.floor(episode.duration / 60) + ':' + String(episode.duration % 60).padStart(2, '0');
+
+    // Up next
+    document.getElementById('upnext').innerHTML = series.episodes.slice(0, 6).map(e => `
+      <a class="player__upnext-card" href="./14-episode-player.html?ep=${series.id}-${e.number}" style="background-image:url('${series.cover}');">
+        <div class="player__upnext-card-ep">Ep ${e.number}</div>
+      </a>
+    `).join('');
+
+    // Cost button reflects paywall state
+    const isVip = vidashort.Storage.isVIP();
+    const coins = vidashort.Storage.getCoins();
+    const cost = episode.requiredCoins || 25;
+    const free = isVip || coins >= cost;
+    const costBubble = document.getElementById('costBubble');
+    const costLabel = document.getElementById('costLabel');
+    if (isVip) { costBubble.innerHTML = '<i class="ph-fill ph-crown"></i>'; costLabel.textContent = 'VIP'; }
+    else if (free) { costLabel.textContent = cost; }
+    else { costBubble.innerHTML = '<i class="ph-bold ph-lock"></i>'; costLabel.textContent = 'Lock'; }
+
+    // Pre-roll for free users on non-first episode
+    if (!isVip && epNum > 1) {
+      const pre = document.getElementById('preroll');
+      pre.style.display = '';
+      setTimeout(() => { pre.style.display = 'none'; }, 3500);
+      document.getElementById('prerollX').addEventListener('click', () => pre.style.display = 'none');
+    }
+
+    // Controls toggle on tap, hide after 3s
+    const player = document.getElementById('player');
+    let controlsTimer;
+    let lastTap = 0;
+    player.addEventListener('click', e => {
+      // Action buttons
+      const act = e.target.closest('.player__action, .player__back, .player__more, .player__upnext-card');
+      if (act) {
+        if (act.id === 'back') { history.length > 1 ? history.back() : location.href = './13-series-detail.html?slug=' + series.slug; return; }
+        if (act.id === 'likeBtn') { act.classList.add('is-liked'); vidashort.Haptics.tap(); return; }
+        if (act.id === 'commentBtn') { location.href = './15-comments.html?ep=' + epId; return; }
+        if (act.id === 'shareBtn') { location.href = './16-share-sheet.html'; return; }
+        if (act.id === 'costBtn') {
+          // If locked, open paywall
+          if (!isVip && !free) { location.href = './25-paywall.html?ep=' + epId; return; }
+          // Otherwise, just consume coins
+          const paywall = vidashort.Paywall || { decide: () => 'free' };
+          const result = paywall.decide ? paywall.decide(episode) : 'free';
+          if (result === 'free' || isVip) {
+            vidashort.Toast.show('Watching…', 'info');
+          }
+          return;
+        }
+        if (act.classList && act.classList.contains('player__upnext-card')) return; // link follows href
+        return;
+      }
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        // double-tap → heart + like
+        const h = document.createElement('span');
+        h.className = 'player__heart';
+        h.innerHTML = '<i class="ph-fill ph-heart"></i>';
+        h.style.left = (e.clientX - 30) + 'px';
+        h.style.top = (e.clientY - 30) + 'px';
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 900);
+        document.getElementById('likeBtn').classList.add('is-liked');
+        vidashort.Haptics.tap();
+        lastTap = 0;
+        return;
+      }
+      lastTap = now;
+      // toggle pause
+      const wasPaused = player.classList.contains('is-paused');
+      player.classList.toggle('is-paused', !wasPaused);
+      player.classList.add('is-controls');
+      clearTimeout(controlsTimer);
+      controlsTimer = setTimeout(() => player.classList.remove('is-controls'), 3000);
+    });
+
+    // Progress simulation
+    let elapsed = 0;
+    const total = episode.duration || 90;
+    function fmt(s) { return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
+    const scrub = document.getElementById('scrub');
+    const cur = document.getElementById('curTime');
+    const iv = setInterval(() => {
+      if (player.classList.contains('is-paused')) return;
+      elapsed += 0.2;
+      const pct = Math.min(100, (elapsed / total) * 100);
+      scrub.style.width = pct + '%';
+      cur.textContent = fmt(elapsed);
+      // Mid-roll at 50%
+      if (elapsed > total * 0.5 && elapsed < total * 0.5 + 0.5) {
+        const pre = document.getElementById('preroll');
+        pre.style.display = '';
+        pre.querySelector('.player__ad-title').textContent = 'Acme VPN — 7 days free';
+        setTimeout(() => pre.style.display = 'none', 3500);
+      }
+      // Ending
+      if (elapsed > total - 3 && !player.classList.contains('is-ending')) {
+        player.classList.add('is-ending');
+        const next = series.episodes.find(e => e.number === episode.number + 1);
+        if (next) document.getElementById('nextToast').textContent = `Next: Ep ${next.number} in 3…`;
+      }
+      if (elapsed >= total) {
+        clearInterval(iv);
+        // Record watch + advance
+        vidashort.Storage.set('episodesWatched', (vidashort.Storage.get('episodesWatched', 0) || 0) + 1);
+        const next = series.episodes.find(e => e.number === episode.number + 1);
+        if (next) {
+          // Every 3rd episode: interstitial
+          const watched = vidashort.Storage.get('episodesWatched', 0);
+          if (watched > 0 && watched % 3 === 0) {
+            location.href = './27-interstitial-ad.html?next=' + series.id + '-' + next.number;
+          } else {
+            location.href = './14-episode-player.html?ep=' + series.id + '-' + next.number;
+          }
+        } else {
+          vidashort.Toast.show('You finished the season!', 'success');
+          setTimeout(() => location.href = './13-series-detail.html?slug=' + series.slug, 800);
+        }
+      }
+    }, 200);
+
+    // Hide chrome on this page (it would block the video)
+    document.getElementById('chrome-topbar') && (document.getElementById('chrome-topbar').style.display = 'none');
+  </script>
+</body>
+</html>

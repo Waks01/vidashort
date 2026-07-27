@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Moderation</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; }
+    .mq { padding: 0 20px; }
+    .mq__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-xl); padding: 16px 0 4px; }
+    .mq__sub { color: var(--color-text-2); font-size: var(--text-sm); margin-bottom: 16px; }
+    .mq__tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 16px; scrollbar-width: none; }
+    .mq__tabs::-webkit-scrollbar { display: none; }
+    .mq__chip { padding: 8px 14px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: 999px; color: var(--color-text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .mq__chip--active { background: var(--gradient-accent); color: white; border-color: transparent; }
+    .mq__count { display: inline-block; margin-left: 4px; font-size: 10px; padding: 1px 6px; background: rgba(255,255,255,0.2); border-radius: 999px; }
+    .mq__card { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px; }
+    .mq__card--high { border-color: rgba(255, 56, 56, 0.4); }
+    .mq__row { display: flex; gap: 12px; align-items: flex-start; }
+    .mq__thumb { width: 56px; height: 80px; border-radius: 4px; background: var(--color-bg-elev-2); background-size: cover; background-position: center; flex-shrink: 0; display: grid; place-items: center; color: var(--color-text-3); }
+    .mq__body { flex: 1; min-width: 0; }
+    .mq__type { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 4px; background: var(--color-bg-elev-2); color: var(--color-text-2); margin-bottom: 6px; }
+    .mq__type--priority { background: rgba(255, 56, 56, 0.15); color: var(--color-error); }
+    .mq__name { font-weight: 700; font-size: var(--text-sm); }
+    .mq__sub2 { font-size: 11px; color: var(--color-text-3); margin-top: 4px; }
+    .mq__reason { font-size: var(--text-sm); color: var(--color-text-2); margin-top: 8px; line-height: 1.5; }
+    .mq__snippet { font-size: 12px; color: var(--color-text-2); font-style: italic; background: var(--color-bg-elev-2); border-radius: 6px; padding: 8px 10px; margin-top: 8px; line-height: 1.4; }
+    .mq__actions { display: flex; gap: 8px; margin-top: 12px; }
+    .mq__btn { flex: 1; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border: none; }
+    .mq__btn--approve { background: var(--color-success); color: white; }
+    .mq__btn--reject  { background: rgba(255, 56, 56, 0.15); color: var(--color-error); border: 1px solid rgba(255, 56, 56, 0.4); }
+    .mq__btn--view    { background: var(--color-bg-elev-2); color: var(--color-text-1); }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Moderation" data-back="true"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="mq">
+      <div class="mq__title">Review queue</div>
+      <div class="mq__sub" id="sub">3 series, 2 comments, 1 account awaiting review</div>
+
+      <div class="mq__tabs" id="tabs">
+        <button class="mq__chip mq__chip--active" data-tab="all">All <span class="mq__count" id="c-all">0</span></button>
+        <button class="mq__chip" data-tab="series">Series <span class="mq__count" id="c-series">0</span></button>
+        <button class="mq__chip" data-tab="comments">Comments <span class="mq__count" id="c-comments">0</span></button>
+        <button class="mq__chip" data-tab="accounts">Accounts <span class="mq__count" id="c-accounts">0</span></button>
+      </div>
+
+      <div id="list"></div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    if (vidashort.Storage.getRole() !== 'admin') vidashort.Storage.setRole('admin');
+    const Q = vidashort.MockData.moderationQueue;
+    document.getElementById('c-all').textContent = Q.series.length + Q.comments.length + Q.accounts.length;
+    document.getElementById('c-series').textContent = Q.series.length;
+    document.getElementById('c-comments').textContent = Q.comments.length;
+    document.getElementById('c-accounts').textContent = Q.accounts.length;
+
+    function render(tab) {
+      const items = tab === 'all' ? [...Q.series, ...Q.comments, ...Q.accounts] : Q[tab];
+      const list = document.getElementById('list');
+      if (!items.length) { list.innerHTML = '<div style="text-align:center; padding:32px; color:var(--color-text-3); font-size:13px;">Nothing to review 🎉</div>'; return; }
+      list.innerHTML = items.map(it => {
+        if (it.type === 'series') {
+          const seriesObj = vidashort.MockData.getSeriesById(it.refId) || { cover: '' };
+          return `
+            <div class="mq__card ${it.priority === 'high' ? 'mq__card--high' : ''}">
+              <div class="mq__row">
+                <div class="mq__thumb" style="background-image:url('${seriesObj.cover}');"></div>
+                <div class="mq__body">
+                  <span class="mq__type ${it.priority === 'high' ? 'mq__type--priority' : ''}">${it.priority === 'high' ? 'Priority' : 'Normal'}</span>
+                  <div class="mq__name">${it.title}</div>
+                  <div class="mq__sub2">by @${it.submitter} • submitted ${it.submittedAt}</div>
+                  <div class="mq__reason">${it.reason}</div>
+                  <div class="mq__actions">
+                    <button class="mq__btn mq__btn--view">View</button>
+                    <button class="mq__btn mq__btn--reject">Reject</button>
+                    <button class="mq__btn mq__btn--approve">Approve</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        if (it.type === 'comment') {
+          return `
+            <div class="mq__card">
+              <span class="mq__type">Comment</span>
+              <div class="mq__name">@${it.author}</div>
+              <div class="mq__sub2">reported ${it.reportedAt} for ${it.reason}</div>
+              <div class="mq__snippet">"${it.snippet}"</div>
+              <div class="mq__actions">
+                <button class="mq__btn mq__btn--view">View thread</button>
+                <button class="mq__btn mq__btn--reject">Delete</button>
+                <button class="mq__btn mq__btn--approve">Dismiss</button>
+              </div>
+            </div>
+          `;
+        }
+        if (it.type === 'account') {
+          return `
+            <div class="mq__card mq__card--high">
+              <span class="mq__type mq__type--priority">Account</span>
+              <div class="mq__name">@${it.handle}</div>
+              <div class="mq__sub2">reported ${it.reportedAt} for ${it.reason}</div>
+              <div class="mq__actions">
+                <button class="mq__btn mq__btn--view">View profile</button>
+                <button class="mq__btn mq__btn--reject">Suspend</button>
+                <button class="mq__btn mq__btn--approve">Clear</button>
+              </div>
+            </div>
+          `;
+        }
+        return '';
+      }).join('');
+
+      list.querySelectorAll('.mq__btn--approve').forEach(b => b.addEventListener('click', () => {
+        vidashort.Haptics.success(); vidashort.Toast.show('Approved', 'success');
+        b.closest('.mq__card').style.opacity = '0.4';
+      }));
+      list.querySelectorAll('.mq__btn--reject').forEach(b => b.addEventListener('click', () => {
+        vidashort.Haptics.error(); vidashort.Toast.show('Rejected', 'error');
+        b.closest('.mq__card').style.opacity = '0.4';
+      }));
+    }
+
+    document.getElementById('tabs').addEventListener('click', e => {
+      const chip = e.target.closest('.mq__chip');
+      if (!chip) return;
+      document.querySelectorAll('.mq__chip').forEach(c => c.classList.toggle('mq__chip--active', c === chip));
+      render(chip.dataset.tab);
+    });
+    render('all');
+  </script>
+</body>
+</html>

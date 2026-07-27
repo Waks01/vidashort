@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Library</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .lb { padding: 0 20px; }
+    .lb__tabs { display: flex; gap: 8px; margin: 8px 0 16px; overflow-x: auto; scrollbar-width: none; }
+    .lb__tabs::-webkit-scrollbar { display: none; }
+    .lb__tab { padding: 8px 14px; border-radius: 999px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); font-size: 12px; font-weight: 700; cursor: pointer; color: var(--color-text-2); white-space: nowrap; }
+    .lb__tab--active { background: var(--gradient-accent); color: white; border-color: transparent; }
+    .lb__group { margin-bottom: 12px; }
+    .lb__group-title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-md); margin-bottom: 8px; }
+    .lb__card { display: flex; gap: 12px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; margin-bottom: 8px; cursor: pointer; transition: background var(--duration-fast); }
+    .lb__card:hover { background: var(--color-bg-elev-2); }
+    .lb__cover { width: 72px; aspect-ratio: 9/16; border-radius: var(--radius-sm); background-size: cover; background-position: center; flex-shrink: 0; }
+    .lb__info { flex: 1; min-width: 0; }
+    .lb__series { font-weight: 800; font-size: 13px; color: var(--color-text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb__ep { font-size: 11px; color: var(--color-text-3); margin-top: 2px; }
+    .lb__bar { height: 4px; background: var(--color-bg-elev-2); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+    .lb__bar-fill { height: 100%; background: var(--gradient-accent); }
+    .lb__time { font-size: 10px; color: var(--color-text-3); margin-top: 4px; }
+    .lb__ad { margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="My library"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="lb">
+      <div class="lb__tabs" id="tabs">
+        <div class="lb__tab lb__tab--active" data-tab="continue">Continue</div>
+        <div class="lb__tab" data-tab="favorites">Favorites</div>
+        <div class="lb__tab" data-tab="watchlist">Watchlist</div>
+        <div class="lb__tab" data-tab="history">History</div>
+      </div>
+      <div id="content"></div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const data = {
+      continue: [
+        { series: vidashort.MockData.allSeries[0], ep: 4, pct: 62, time: '2h ago' },
+        { series: vidashort.MockData.allSeries[2], ep: 1, pct: 18, time: 'yesterday' }
+      ],
+      favorites: vidashort.MockData.allSeries.slice(0, 3),
+      watchlist: vidashort.MockData.allSeries.slice(2, 4),
+      history: vidashort.MockData.allSeries.map(s => ({ series: s, ep: Math.floor(Math.random() * 10) + 1, time: '3d ago' }))
+    };
+    function render(tab) {
+      const c = document.getElementById('content');
+      if (tab === 'continue') {
+        c.innerHTML = `
+          <div class="lb__group">
+            <div class="lb__group-title">Pick up where you left off</div>
+            ${data.continue.map(r => `
+              <a class="lb__card" href="./14-episode-player.html?ep=${r.series.id}-${r.ep}">
+                <div class="lb__cover" style="background-image:url('${r.series.cover}')"></div>
+                <div class="lb__info">
+                  <div class="lb__series">${r.series.title}</div>
+                  <div class="lb__ep">Episode ${r.ep} • ${r.time}</div>
+                  <div class="lb__bar"><div class="lb__bar-fill" style="width:${r.pct}%"></div></div>
+                  <div class="lb__time">${r.pct}% watched</div>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        `;
+      } else if (tab === 'favorites') {
+        c.innerHTML = `
+          <div class="lb__group">
+            <div class="lb__group-title">Your favorites</div>
+            ${data.favorites.map(s => `
+              <a class="lb__card" href="./13-series-detail.html?slug=${s.slug}">
+                <div class="lb__cover" style="background-image:url('${s.cover}')"></div>
+                <div class="lb__info">
+                  <div class="lb__series">${s.title}</div>
+                  <div class="lb__ep">${s.category} • ${s.totalEpisodes} ep</div>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        `;
+      } else if (tab === 'watchlist') {
+        c.innerHTML = `
+          <div class="lb__group">
+            <div class="lb__group-title">Saved for later</div>
+            ${data.watchlist.map(s => `
+              <a class="lb__card" href="./13-series-detail.html?slug=${s.slug}">
+                <div class="lb__cover" style="background-image:url('${s.cover}')"></div>
+                <div class="lb__info">
+                  <div class="lb__series">${s.title}</div>
+                  <div class="lb__ep">${s.category} • ${s.totalEpisodes} ep</div>
+                </div>
+              </a>
+            `).join('') || '<div class="empty-state">No series in your watchlist yet.</div>'}
+          </div>
+        `;
+      } else if (tab === 'history') {
+        c.innerHTML = `
+          <div class="lb__group">
+            <div class="lb__group-title">Recently watched</div>
+            ${data.history.map(r => `
+              <a class="lb__card" href="./13-series-detail.html?slug=${r.series.slug}">
+                <div class="lb__cover" style="background-image:url('${r.series.cover}')"></div>
+                <div class="lb__info">
+                  <div class="lb__series">${r.series.title}</div>
+                  <div class="lb__ep">Episode ${r.ep} • ${r.time}</div>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+    document.getElementById('tabs').addEventListener('click', e => {
+      const t = e.target.closest('.lb__tab');
+      if (!t) return;
+      document.querySelectorAll('#tabs .lb__tab').forEach(x => x.classList.toggle('lb__tab--active', x === t));
+      render(t.dataset.tab);
+    });
+    render('continue');
+  </script>
+</body>
+</html>

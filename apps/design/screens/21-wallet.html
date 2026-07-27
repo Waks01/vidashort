@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Wallet</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .wt { padding: 0 20px; }
+    .wt__balance { background: var(--gradient-gold); border-radius: var(--radius-lg); padding: 20px; color: #1a0e00; margin-top: 12px; position: relative; overflow: hidden; }
+    .wt__balance::after { content: ''; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%); border-radius: 50%; }
+    .wt__balance-label { font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.8; }
+    .wt__balance-amt { font-size: 44px; font-weight: 800; line-height: 1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+    .wt__balance-sub { font-size: 12px; font-weight: 600; margin-top: 6px; opacity: 0.8; }
+    .wt__balance-actions { display: flex; gap: 8px; margin-top: 14px; position: relative; z-index: 1; }
+    .wt__btn { flex: 1; padding: 10px; border-radius: 999px; font-weight: 800; font-size: 12px; background: rgba(0,0,0,0.15); color: #1a0e00; text-align: center; }
+    .wt__btn--solid { background: #1a0e00; color: var(--color-gold-1); }
+
+    .wt__vip { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin: 12px 0; }
+    .wt__vip-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--gradient-gold); display: grid; place-items: center; color: #1a0e00; font-size: 20px; flex-shrink: 0; }
+    .wt__vip-body { flex: 1; }
+    .wt__vip-title { font-weight: 800; font-size: 13px; }
+    .wt__vip-sub { font-size: 11px; color: var(--color-text-3); }
+    .wt__vip-btn { padding: 6px 12px; background: var(--gradient-gold); color: #1a0e00; border-radius: 999px; font-size: 11px; font-weight: 800; }
+
+    .wt__daily { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--gradient-accent); border-radius: var(--radius-md); color: white; margin-bottom: 12px; }
+    .wt__daily-icon { font-size: 28px; }
+    .wt__daily-body { flex: 1; }
+    .wt__daily-title { font-weight: 800; font-size: 13px; }
+    .wt__daily-sub { font-size: 11px; opacity: 0.85; }
+    .wt__daily-btn { padding: 6px 12px; background: white; color: var(--color-accent-1); border-radius: 999px; font-size: 11px; font-weight: 800; }
+
+    .wt__section-title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-md); margin: 16px 0 8px; }
+    .wt__earn { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .wt__earn-card { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; text-align: center; cursor: pointer; }
+    .wt__earn-icon { font-size: 28px; color: var(--color-gold-1); margin-bottom: 4px; }
+    .wt__earn-label { font-weight: 800; font-size: 11px; }
+    .wt__earn-sub { font-size: 10px; color: var(--color-text-3); }
+
+    .wt__tx { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+    .wt__tx-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--color-border); }
+    .wt__tx-row:last-child { border-bottom: none; }
+    .wt__tx-icon { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; }
+    .wt__tx-icon--plus { background: rgba(46, 212, 122, 0.15); color: var(--color-success); }
+    .wt__tx-icon--minus { background: rgba(255, 31, 90, 0.15); color: var(--color-accent-1); }
+    .wt__tx-body { flex: 1; min-width: 0; }
+    .wt__tx-label { font-size: 13px; font-weight: 600; }
+    .wt__tx-date { font-size: 10px; color: var(--color-text-3); }
+    .wt__tx-amt { font-weight: 800; font-variant-numeric: tabular-nums; }
+    .wt__tx-amt--plus { color: var(--color-success); }
+    .wt__tx-amt--minus { color: var(--color-text-2); }
+
+    .wt__ad { margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Wallet"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="wt">
+      <div class="wt__balance">
+        <div class="wt__balance-label">Your balance</div>
+        <div class="wt__balance-amt" id="bal">0 coins</div>
+        <div class="wt__balance-sub" id="balSub">≈ 0 episodes</div>
+        <div class="wt__balance-actions">
+          <a class="wt__btn wt__btn--solid" href="./22-coin-store.html">Top up</a>
+          <a class="wt__btn" href="./23-vip.html">Go VIP</a>
+        </div>
+      </div>
+
+      <a class="wt__vip" id="vipBanner" href="./23-vip.html">
+        <div class="wt__vip-icon"><i class="ph-fill ph-crown"></i></div>
+        <div class="wt__vip-body">
+          <div class="wt__vip-title" id="vipTitle">Unlock unlimited drama</div>
+          <div class="wt__vip-sub" id="vipSub">From ₦500/week</div>
+        </div>
+        <div class="wt__vip-btn">Try free</div>
+      </a>
+
+      <a class="wt__daily" href="./24-daily-reward.html">
+        <div class="wt__daily-icon"><i class="ph-fill ph-fire"></i></div>
+        <div class="wt__daily-body">
+          <div class="wt__daily-title" id="dailyTitle">Day 5 — keep your streak alive</div>
+          <div class="wt__daily-sub" id="dailySub">Claim 5 free coins</div>
+        </div>
+        <div class="wt__daily-btn" id="dailyBtn">Claim</div>
+      </a>
+
+      <div class="wt__section-title">Earn more</div>
+      <div class="wt__earn">
+        <a class="wt__earn-card" href="./26-rewarded-ad.html">
+          <div class="wt__earn-icon"><i class="ph-fill ph-play-circle"></i></div>
+          <div class="wt__earn-label">Watch ad</div>
+          <div class="wt__earn-sub">+20 coins</div>
+        </a>
+        <a class="wt__earn-card" href="./24-daily-reward.html">
+          <div class="wt__earn-icon"><i class="ph-fill ph-fire"></i></div>
+          <div class="wt__earn-label">Daily</div>
+          <div class="wt__earn-sub">+5 to 50</div>
+        </a>
+        <a class="wt__earn-card" href="#">
+          <div class="wt__earn-icon"><i class="ph-fill ph-gift"></i></div>
+          <div class="wt__earn-label">Invite</div>
+          <div class="wt__earn-sub">+500/friend</div>
+        </a>
+      </div>
+
+      <div class="wt__section-title">Recent activity</div>
+      <div class="wt__tx" id="tx"></div>
+
+      <div class="ad-banner wt__ad">
+        <span class="ad-banner__pill">Sponsored</span>
+        <div class="ad-banner__title">Install <span>Acme VPN</span> — Free for 7 days</div>
+        <button class="ad-banner__cta">Install</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const coins = vidashort.Storage.getCoins();
+    document.getElementById('bal').textContent = coins.toLocaleString() + ' coins';
+    document.getElementById('balSub').textContent = '≈ ' + Math.floor(coins / vidashort.ECONOMY.episodeCostCoins) + ' episodes • ≈ ₦' + (coins / 10).toFixed(0);
+
+    if (vidashort.Storage.isVIP()) {
+      const until = vidashort.Storage.getVIPUntil();
+      const date = new Date(until);
+      document.getElementById('vipTitle').textContent = 'VIP active until ' + date.toLocaleDateString();
+      document.getElementById('vipSub').textContent = 'Unlimited drama, ad-free';
+      document.getElementById('vipBanner').href = './23-vip.html';
+    }
+
+    const streak = vidashort.Storage.getStreak();
+    document.getElementById('dailyTitle').textContent = `Day ${streak.day} — keep your streak alive`;
+
+    const txs = vidashort.MockData.recentTransactions || [
+      { type: 'plus', label: 'Daily reward', date: 'Today, 9:00', amt: 5 },
+      { type: 'plus', label: 'Watched ad', date: 'Yesterday', amt: 20 },
+      { type: 'minus', label: 'Unlocked: Ep 3 — The CEO\'s Secret Heir', date: 'Yesterday', amt: -25 },
+      { type: 'plus', label: 'Purchased 200+20 coins', date: '2 days ago', amt: 220 },
+      { type: 'minus', label: 'Unlocked: Ep 1 — Rebirth Queen', date: '3 days ago', amt: -25 }
+    ];
+    document.getElementById('tx').innerHTML = txs.map(t => `
+      <div class="wt__tx-row">
+        <div class="wt__tx-icon wt__tx-icon--${t.type}"><i class="ph-bold ph-${t.type === 'plus' ? 'plus' : 'minus'}"></i></div>
+        <div class="wt__tx-body">
+          <div class="wt__tx-label">${t.label}</div>
+          <div class="wt__tx-date">${t.date}</div>
+        </div>
+        <div class="wt__tx-amt wt__tx-amt--${t.type}">${t.type === 'plus' ? '+' : ''}${t.amt} coins</div>
+      </div>
+    `).join('');
+  </script>
+</body>
+</html>

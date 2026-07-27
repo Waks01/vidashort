@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — How will you watch?</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .role { height: 100%; display: flex; flex-direction: column; padding: 0 24px; }
+    .role__top { padding: 56px 0 16px; }
+    .role__back { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: var(--color-text-1); cursor: pointer; margin-bottom: 12px; }
+    .role__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-2xl); margin-bottom: 8px; }
+    .role__sub { color: var(--color-text-2); font-size: var(--text-sm); line-height: 1.5; }
+    .role__cards { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 24px 0; }
+    .role-card {
+      position: relative;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px;
+      background: var(--color-bg-elev-1);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-out);
+      text-align: left;
+      width: 100%;
+      color: var(--color-text-1);
+    }
+    .role-card:hover { border-color: var(--color-border-strong); transform: translateY(-2px); }
+    .role-card--selected { border-color: var(--color-accent-1); box-shadow: var(--glow-magenta); }
+    .role-card--creator { background: linear-gradient(135deg, rgba(255, 226, 122, 0.06), rgba(212, 160, 23, 0.02)); border-color: rgba(255, 226, 122, 0.3); }
+    .role-card--creator.role-card--selected { border-color: var(--color-gold-1); box-shadow: var(--glow-gold); }
+    .role-card__icon {
+      width: 48px; height: 48px;
+      display: grid; place-items: center;
+      border-radius: var(--radius-md);
+      flex-shrink: 0;
+      font-size: 24px;
+    }
+    .role-card--viewer .role-card__icon { background: var(--gradient-accent); color: white; }
+    .role-card--creator .role-card__icon { background: var(--gradient-gold); color: #1a0e00; }
+    .role-card__body { flex: 1; }
+    .role-card__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-lg); margin-bottom: 4px; }
+    .role-card__sub { color: var(--color-text-2); font-size: var(--text-sm); line-height: 1.5; }
+    .role-card__reward { display: inline-block; margin-top: 8px; font-size: var(--text-xs); color: var(--color-gold-1); font-weight: 700; letter-spacing: 0.04em; }
+    .role-card__check { position: absolute; top: 16px; right: 16px; width: 24px; height: 24px; border-radius: 50%; background: var(--color-accent-1); color: white; display: none; place-items: center; font-size: 14px; }
+    .role-card--creator .role-card__check { background: var(--gradient-gold); color: #1a0e00; }
+    .role-card--selected .role-card__check { display: grid; }
+    .role__actions { padding: 8px 0 32px; }
+    .role__note { text-align: center; font-size: var(--text-xs); color: var(--color-text-3); padding: 12px 0 0; }
+  </style>
+</head>
+<body>
+  <main class="screen" data-direction="forward">
+    <div class="role">
+      <div class="role__top">
+        <div class="role__back" data-nav="back"><i class="ph ph-arrow-left" style="font-size:22px;"></i></div>
+        <h1 class="role__title">One last thing.</h1>
+        <p class="role__sub">How will you use vidashort? You can change this later in Settings.</p>
+      </div>
+
+      <div class="role__cards">
+        <button class="role-card role-card--viewer role-card--selected" id="role-viewer" data-role="viewer">
+          <div class="role-card__icon"><i class="ph-fill ph-play"></i></div>
+          <div class="role-card__body">
+            <div class="role-card__title">I'm here to watch</div>
+            <div class="role-card__sub">Endless drama, one swipe away. Discover series, unlock episodes, earn rewards.</div>
+          </div>
+          <div class="role-card__check"><i class="ph-bold ph-check"></i></div>
+        </button>
+
+        <button class="role-card role-card--creator" id="role-creator" data-role="creator">
+          <div class="role-card__icon"><i class="ph-fill ph-video-camera"></i></div>
+          <div class="role-card__body">
+            <div class="role-card__title">I'm here to create</div>
+            <div class="role-card__sub">Upload your own microdramas. Keep 60% of every paid unlock as loyalty points.</div>
+            <span class="role-card__reward">Earn ₦2.50 per paid unlock</span>
+          </div>
+          <div class="role-card__check"><i class="ph-bold ph-check"></i></div>
+        </button>
+      </div>
+
+      <div class="role__actions">
+        <button class="btn btn--primary btn--lg btn--block" id="continue">Continue</button>
+        <div class="role__note">By continuing you agree to our Terms of Service and Privacy Policy.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script>
+    let selected = vidashort.Storage.getRole() || 'viewer';
+
+    const cards = document.querySelectorAll('.role-card');
+    cards.forEach(c => c.addEventListener('click', () => {
+      selected = c.dataset.role;
+      cards.forEach(x => x.classList.toggle('role-card--selected', x.dataset.role === selected));
+      vidashort.Haptics.tap();
+    }));
+
+    document.getElementById('continue').addEventListener('click', () => {
+      vidashort.Storage.setRole(selected);
+      vidashort.Haptics.success();
+      if (selected === 'creator') {
+        vidashort.Router.go('./05a-creator-signup.html');
+      } else {
+        vidashort.Router.go('./05-auth-entry.html');
+      }
+    });
+    document.querySelector('[data-nav="back"]').addEventListener('click', () => vidashort.Router.back());
+  </script>
+</body>
+</html>

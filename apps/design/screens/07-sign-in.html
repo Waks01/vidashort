@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Sign in</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .signin { height: 100%; display: flex; flex-direction: column; padding: 0 24px; }
+    .signin__top { padding: 56px 0 24px; }
+    .signin__back { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: var(--color-text-1); cursor: pointer; margin-bottom: 16px; }
+    .signin__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-2xl); margin-bottom: 8px; }
+    .signin__sub { color: var(--color-text-2); font-size: var(--text-sm); }
+    .signin__form { flex: 1; display: flex; flex-direction: column; gap: 16px; padding-top: 24px; }
+    .signin__row { display: flex; align-items: center; justify-content: space-between; }
+    .signin__forgot { color: var(--color-accent-3); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .signin__actions { padding: 24px 0 16px; }
+    .signin__divider { display: flex; align-items: center; gap: 12px; color: var(--color-text-3); font-size: var(--text-xs); letter-spacing: var(--tracking-widest); text-transform: uppercase; margin: 16px 0; }
+    .signin__divider::before, .signin__divider::after { content: ''; flex: 1; height: 1px; background: var(--color-border); }
+    .signin__socials { display: flex; flex-direction: column; gap: 10px; }
+    .signin__alt { text-align: center; padding: 16px 0 32px; font-size: var(--text-sm); color: var(--color-text-2); }
+    .signin__alt a { color: var(--color-accent-3); font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main class="screen" data-direction="forward">
+    <div class="signin">
+      <div class="signin__top">
+        <div class="signin__back" data-nav="back"><i class="ph ph-arrow-left" style="font-size:22px;"></i></div>
+        <h1 class="signin__title">Welcome back</h1>
+        <p class="signin__sub">Sign in to continue watching.</p>
+      </div>
+
+      <form class="signin__form" id="form" autocomplete="off">
+        <div>
+          <label class="label" for="email">Email</label>
+          <div class="input-group">
+            <i class="ph ph-envelope input-group__icon"></i>
+            <input class="input input--with-icon" id="email" type="email" placeholder="you@example.com" required>
+          </div>
+        </div>
+
+        <div>
+          <div class="signin__row">
+            <label class="label" for="pw" style="margin-bottom:0;">Password</label>
+            <span class="signin__forgot" data-nav="forgot">Forgot password?</span>
+          </div>
+          <div class="input-group" style="margin-top:8px;">
+            <i class="ph ph-lock input-group__icon"></i>
+            <input class="input input--with-icon" id="pw" type="password" placeholder="Your password" required>
+            <span class="input-group__action" id="togglePw">Show</span>
+          </div>
+        </div>
+
+        <label class="checkbox">
+          <input type="checkbox" id="remember">
+          <span class="checkbox__box"></span>
+          <span class="checkbox__label">Keep me signed in</span>
+        </label>
+      </form>
+
+      <div class="signin__actions">
+        <button class="btn btn--primary btn--lg btn--block" id="submit">Sign in</button>
+      </div>
+
+      <div class="signin__divider">or continue with</div>
+      <div class="signin__socials">
+        <button class="provider-btn provider-btn--apple" id="apple">
+          <i class="ph-bold ph-apple-logo"></i> Continue with Apple
+        </button>
+        <button class="provider-btn provider-btn--google" id="google">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21.35 11.1H12v3.2h5.35c-.5 2.4-2.5 3.7-5.35 3.7-3.25 0-5.9-2.65-5.9-5.9s2.65-5.9 5.9-5.9c1.45 0 2.75.5 3.8 1.4l2.4-2.4C16.55 3.85 14.45 3 12 3 7.05 3 3 7.05 3 12s4.05 9 9 9c4.65 0 8.7-3.4 8.7-9 0-.6-.05-1.3-.35-1.9z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+      <div class="signin__alt">Don't have an account? <a data-nav="signup">Sign up</a></div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script>
+    const togglePw = document.getElementById('togglePw');
+    togglePw.addEventListener('click', () => {
+      const t = document.getElementById('pw').type === 'password' ? 'text' : 'password';
+      document.getElementById('pw').type = t;
+      togglePw.textContent = t === 'password' ? 'Show' : 'Hide';
+    });
+
+    function socialAuth(name) {
+      vidashort.Haptics.tap();
+      vidashort.Toast.show(`Signing in with ${name}…`, 'info');
+      setTimeout(() => {
+        vidashort.Storage.setAuth({ provider: name.toLowerCase(), name: 'Maya', email: 'maya@example.com' });
+        vidashort.Haptics.success();
+        vidashort.Toast.show('Welcome back!', 'success');
+        setTimeout(() => vidashort.Router.go('./10-home.html'), 400);
+      }, 700);
+    }
+    document.getElementById('apple').addEventListener('click', () => socialAuth('Apple'));
+    document.getElementById('google').addEventListener('click', () => socialAuth('Google'));
+
+    document.getElementById('submit').addEventListener('click', () => {
+      const email = document.getElementById('email').value.trim();
+      const pw = document.getElementById('pw').value;
+      if (!email || !pw) {
+        vidashort.Toast.show('Enter your email and password', 'error');
+        vidashort.Haptics.error();
+        return;
+      }
+      // Simulate wrong-password check (anything that doesn't contain '@' fails)
+      if (!email.includes('@')) {
+        vidashort.Toast.show('Wrong email or password', 'error');
+        vidashort.Haptics.error();
+        return;
+      }
+      document.getElementById('submit').setAttribute('aria-busy', 'true');
+      setTimeout(() => {
+        vidashort.Storage.setAuth({ provider: 'email', name: email.split('@')[0], email });
+        vidashort.Haptics.success();
+        vidashort.Toast.show('Welcome back!', 'success');
+        setTimeout(() => vidashort.Router.go('./10-home.html'), 400);
+      }, 700);
+    });
+
+    document.querySelector('[data-nav="back"]').addEventListener('click', () => vidashort.Router.back());
+    document.querySelector('[data-nav="forgot"]').addEventListener('click', () => vidashort.Router.go('./08-forgot-password.html'));
+    document.querySelector('[data-nav="signup"]').addEventListener('click', () => vidashort.Router.go('./06-sign-up.html'));
+  </script>
+</body>
+</html>

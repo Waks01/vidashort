@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.expo/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# OneDrive debri$
+~$*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.python-version
+
+# Misc
+.cache/

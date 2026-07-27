@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  logo-a-theatrical.svg — STOPGAP / reference variant for brand showcase.
+  Brand spec: docs/brand/00-overview.md § 9 calls this out as "Reference ·
+  Theatrical Serif" — Playfair Display 900 italic + gold-coin "i".
+  Shown at 0.5 opacity in apps/design/index.html brand showcase panel.
+  Real implementation should come from Figma.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 180" width="480" height="180">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,900&amp;display=swap');
+      .wm { font-family: 'Playfair Display', Georgia, serif; font-weight: 900; font-style: italic; fill: #f5e9d4; }
+    </style>
+    <radialGradient id="coin" cx="35%" cy="30%" r="60%">
+      <stop offset="0%"  stop-color="#ffe27a"/>
+      <stop offset="60%" stop-color="#d4a017"/>
+      <stop offset="100%" stop-color="#8b6914"/>
+    </radialGradient>
+  </defs>
+  <text x="20" y="140" class="wm" font-size="160">v</text>
+  <circle cx="40" cy="68" r="16" fill="url(#coin)"/>
+  <text x="65" y="140" class="wm" font-size="160">idashort</text>
+</svg>

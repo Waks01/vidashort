@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Payouts</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; }
+    .po { padding: 0 20px; }
+    .po__head { padding: 16px 0 8px; }
+    .po__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-xl); }
+    .po__balance {
+      background: linear-gradient(135deg, rgba(255,226,122,0.10), rgba(212,160,23,0.04));
+      border: 1px solid rgba(255,226,122,0.3);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .po__balance-label { font-size: var(--text-xs); color: var(--color-gold-1); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+    .po__balance-val { font-family: var(--font-body); font-weight: 800; font-size: 44px; color: var(--color-text-1); line-height: 1.1; margin: 4px 0; font-variant-numeric: tabular-nums; }
+    .po__balance-sub { color: var(--color-text-2); font-size: var(--text-sm); }
+    .po__cta { width: 100%; margin-top: 16px; }
+    .po__method { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin: 12px 0 20px; }
+    .po__method i { font-size: 22px; color: var(--color-gold-1); }
+    .po__method-info { flex: 1; }
+    .po__method-name { font-weight: 700; font-size: var(--text-sm); }
+    .po__method-acct { font-size: 11px; color: var(--color-text-3); margin-top: 2px; }
+    .po__section { margin-bottom: 24px; }
+    .po__section-title { font-weight: 700; font-size: var(--text-sm); margin-bottom: 8px; color: var(--color-text-1); }
+    .po__row { display: flex; gap: 12px; align-items: center; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 8px; }
+    .po__row-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--color-bg-elev-2); display: grid; place-items: center; flex-shrink: 0; }
+    .po__row-icon--pending  { color: var(--color-warning); }
+    .po__row-icon--approved { color: var(--color-success); }
+    .po__row-icon--paid     { color: var(--color-accent-1); }
+    .po__row-info { flex: 1; }
+    .po__row-amt { font-weight: 800; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+    .po__row-date { font-size: 11px; color: var(--color-text-3); margin-top: 2px; }
+    .po__row-status { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 4px; }
+    .po__row-status--pending  { background: rgba(255, 182, 72, 0.15); color: var(--color-warning); }
+    .po__row-status--approved { background: rgba(46, 212, 122, 0.15); color: var(--color-success); }
+    .po__row-status--paid     { background: rgba(255, 31, 90, 0.15); color: var(--color-accent-1); }
+    .po__note { font-size: 11px; color: var(--color-text-3); padding: 8px 0 0; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Payouts" data-back="true"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="po">
+      <div class="po__head">
+        <div class="po__title">Cash out your earnings</div>
+      </div>
+
+      <div class="po__balance">
+        <div class="po__balance-label">Available to cash out</div>
+        <div class="po__balance-val" id="bal">₦0</div>
+        <div class="po__balance-sub" id="pts">0 loyalty points</div>
+        <button class="btn btn--gold btn--lg po__cta" id="cashout">Cash out to OPay</button>
+        <div class="po__note">Minimum payout: ₦5,000. Arrives within 24 hours.</div>
+      </div>
+
+      <div class="po__method">
+        <i class="ph-fill ph-wallet"></i>
+        <div class="po__method-info">
+          <div class="po__method-name" id="methodName">OPay</div>
+          <div class="po__method-acct" id="methodAcct">0813****7821</div>
+        </div>
+        <i class="ph ph-pencil-simple" style="color:var(--color-text-3); cursor:pointer;"></i>
+      </div>
+
+      <div class="po__section">
+        <div class="po__section-title">History</div>
+        <div id="history"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    if (!vidashort.Auth.requireRole('creator')) {}
+    const profile = vidashort.Storage.getCreatorProfile() || vidashort.MockData.creators[0];
+    const earnings = vidashort.Storage.getCreatorEarnings();
+    const available = earnings.pendingNaira || profile.pendingPayoutNaira || 0;
+    const availableCoins = earnings.pendingCoins || profile.loyaltyPoints || 0;
+
+    document.getElementById('bal').textContent = '₦' + available.toLocaleString();
+    document.getElementById('pts').textContent = availableCoins.toLocaleString() + ' loyalty points';
+    document.getElementById('methodName').textContent = profile.payoutMethod || 'OPay';
+    document.getElementById('methodAcct').textContent = profile.payoutAccount || '0813****7821';
+
+    const E = vidashort.MockData.ECONOMY;
+    document.getElementById('cashout').addEventListener('click', () => {
+      if (availableCoins < E.payoutThresholdCoins) {
+        vidashort.Confirm.open({
+          title: 'Below minimum',
+          body: `You need at least <strong>${E.payoutThresholdCoins.toLocaleString()} coins (₦${(E.payoutThresholdCoins/10).toLocaleString()})</strong> to cash out. Keep earning!`,
+          confirmLabel: 'Got it',
+          cancelLabel: 'Close',
+          onConfirm: () => vidashort.Toast.show('Watch a few more ads to earn more!', 'info'),
+        });
+        return;
+      }
+      vidashort.Confirm.open({
+        title: 'Cash out ₦' + available.toLocaleString() + '?',
+        body: `Funds will be sent to your <strong>${profile.payoutMethod || 'OPay'}</strong> account within 24 hours.`,
+        confirmLabel: 'Confirm payout',
+        onConfirm: () => {
+          vidashort.Haptics.success();
+          vidashort.Toast.show('Payout request submitted', 'success');
+          vidashort.Confetti.burst({ originX: 50, originY: 50 });
+          // Simulate clearing pending
+          const e = vidashort.Storage.getCreatorEarnings();
+          e.pendingCoins = 0; e.pendingNaira = 0;
+          vidashort.Storage.set('creator.earnings', e);
+          setTimeout(() => location.reload(), 800);
+        },
+      });
+    });
+
+    const hist = document.getElementById('history');
+    const myPayouts = vidashort.MockData.payoutRequests.filter(p => p.creatorId === profile.id);
+    if (!myPayouts.length) {
+      hist.innerHTML = '<div style="text-align:center; color:var(--color-text-3); font-size:13px; padding:24px 0;">No payouts yet.</div>';
+    } else {
+      hist.innerHTML = myPayouts.map(p => {
+        const icon = p.status === 'pending' ? 'hourglass-medium' : p.status === 'approved' ? 'check-circle' : 'check-double';
+        return `
+          <div class="po__row">
+            <div class="po__row-icon po__row-icon--${p.status}"><i class="ph-fill ph-${icon}"></i></div>
+            <div class="po__row-info">
+              <div class="po__row-amt">₦${p.amountNaira.toLocaleString()}</div>
+              <div class="po__row-date">${p.requestedAt} • ${p.method} ${p.account}</div>
+            </div>
+            <div class="po__row-status po__row-status--${p.status}">${p.status}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

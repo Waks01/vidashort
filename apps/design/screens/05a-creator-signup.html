@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Become a creator</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .csu { height: 100%; display: flex; flex-direction: column; padding: 0 24px; overflow-y: auto; }
+    .csu__top { padding: 56px 0 16px; }
+    .csu__back { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: var(--color-text-1); cursor: pointer; margin-bottom: 12px; }
+    .csu__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-2xl); margin-bottom: 8px; }
+    .csu__sub { color: var(--color-text-2); font-size: var(--text-sm); line-height: 1.5; }
+    .csu__hero {
+      display: flex; gap: 12px; align-items: center;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(255,226,122,0.10), rgba(212,160,23,0.04));
+      border: 1px solid rgba(255,226,122,0.3);
+      border-radius: var(--radius-md);
+      margin: 20px 0 24px;
+    }
+    .csu__hero-icon { width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--gradient-gold); color: #1a0e00; display: grid; place-items: center; font-size: 24px; flex-shrink: 0; }
+    .csu__hero-body { flex: 1; font-size: var(--text-xs); color: var(--color-text-2); line-height: 1.5; }
+    .csu__hero-body strong { color: var(--color-gold-1); font-weight: 700; }
+    .csu__form { display: flex; flex-direction: column; gap: 16px; padding-bottom: 24px; }
+    .csu__row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .csu__actions { padding: 8px 0 32px; }
+    .csu__alt { text-align: center; padding: 8px 0 16px; font-size: var(--text-sm); color: var(--color-text-2); }
+    .csu__alt a { color: var(--color-accent-3); font-weight: 600; cursor: pointer; }
+    .csu__terms { font-size: var(--text-xs); color: var(--color-text-3); text-align: center; padding: 12px 24px 0; line-height: 1.5; }
+    .csu__terms a { color: var(--color-accent-3); text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main class="screen" data-direction="forward">
+    <div class="csu">
+      <div class="csu__top">
+        <div class="csu__back" data-nav="back"><i class="ph ph-arrow-left" style="font-size:22px;"></i></div>
+        <h1 class="csu__title">Become a creator</h1>
+        <p class="csu__sub">Upload your microdramas, build an audience, and keep 60% of every paid unlock.</p>
+      </div>
+
+      <div class="csu__hero">
+        <div class="csu__hero-icon"><i class="ph-fill ph-coins"></i></div>
+        <div class="csu__hero-body">
+          Each 25-coin episode unlock (<strong>₦2.50</strong>) splits <strong>60% to you</strong>, 40% to vidashort. Cash out anytime from ₦5,000.
+        </div>
+      </div>
+
+      <form class="csu__form" id="form" autocomplete="off">
+        <div>
+          <label class="label" for="channel">Channel name</label>
+          <input class="input" id="channel" type="text" placeholder="e.g. Ada Stories" required>
+        </div>
+        <div>
+          <label class="label" for="handle">Handle</label>
+          <div class="input-group">
+            <span class="input-group__icon" style="padding:0 0 0 14px; color:var(--color-text-3); font-weight:600;">@</span>
+            <input class="input" id="handle" type="text" placeholder="your-handle" required>
+          </div>
+        </div>
+        <div>
+          <label class="label" for="niche">Primary niche</label>
+          <select class="input" id="niche" required>
+            <option value="">Select a niche</option>
+            <option>CEO Romance</option>
+            <option>Werewolf</option>
+            <option>Rebirth</option>
+            <option>Billionaire</option>
+            <option>Pregnant</option>
+            <option>Revenge</option>
+            <option>Fantasy</option>
+            <option>Historical</option>
+            <option>Mafia</option>
+            <option>Family</option>
+            <option>Medical</option>
+          </select>
+        </div>
+        <div class="csu__row2">
+          <div>
+            <label class="label" for="payout">Payout method</label>
+            <select class="input" id="payout" required>
+              <option>OPay</option>
+              <option>PalmPay</option>
+              <option>Moniepoint</option>
+              <option>Bank transfer</option>
+            </select>
+          </div>
+          <div>
+            <label class="label" for="account">Account number</label>
+            <input class="input" id="account" type="tel" placeholder="0123456789" maxlength="11" required>
+          </div>
+        </div>
+        <div>
+          <label class="label" for="email">Email</label>
+          <input class="input" id="email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div>
+          <label class="label" for="pw">Password</label>
+          <input class="input" id="pw" type="password" placeholder="At least 8 characters" required>
+        </div>
+        <label class="checkbox">
+          <input type="checkbox" id="terms" required>
+          <span class="checkbox__box"></span>
+          <span class="checkbox__label">I agree to the <a href="#">Creator Terms</a> and confirm I own the rights to all content I upload.</span>
+        </label>
+      </form>
+
+      <div class="csu__actions">
+        <button class="btn btn--gold btn--lg btn--block" id="submit">Create creator account</button>
+      </div>
+      <div class="csu__alt">Just want to watch? <a data-nav="viewer">Sign up as a viewer</a></div>
+      <p class="csu__terms">By creating an account you agree to the vidashort <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script>
+    document.getElementById('submit').addEventListener('click', () => {
+      const channel = document.getElementById('channel').value.trim();
+      const handle  = document.getElementById('handle').value.trim();
+      const niche   = document.getElementById('niche').value;
+      const payout  = document.getElementById('payout').value;
+      const account = document.getElementById('account').value.trim();
+      const email   = document.getElementById('email').value.trim();
+      const pw      = document.getElementById('pw').value;
+      const terms   = document.getElementById('terms').checked;
+
+      if (!channel || !handle || !niche || !account || !email || pw.length < 8 || !terms) {
+        vidashort.Toast.show('Please complete every field and accept the terms', 'error');
+        vidashort.Haptics.error();
+        return;
+      }
+      if (!/^[0-9]{10,11}$/.test(account)) {
+        vidashort.Toast.show('Account number must be 10–11 digits', 'error');
+        return;
+      }
+
+      document.getElementById('submit').setAttribute('aria-busy', 'true');
+      setTimeout(() => {
+        vidashort.Storage.setRole('creator');
+        vidashort.Storage.setAuth({ provider: 'email', name: channel, email });
+        vidashort.Storage.setCreatorProfile({
+          id: 'me', handle, name: channel, niche, payoutMethod: payout, payoutAccount: account, email,
+          followers: 0, totalViews: 0, seriesCount: 0, verified: false,
+          joinedAt: new Date().toISOString().slice(0, 10),
+          loyaltyPoints: 0, lifetimeEarningsNaira: 0, pendingPayoutNaira: 0,
+        });
+        vidashort.Storage.setCreatorSeries([]);
+        vidashort.Haptics.success();
+        vidashort.Toast.show('Welcome, creator!', 'success');
+        vidashort.Confetti.burst({ originX: 50, originY: 50 });
+        setTimeout(() => vidashort.Router.go('./50-creator-dashboard.html'), 700);
+      }, 900);
+    });
+
+    document.querySelector('[data-nav="back"]').addEventListener('click', () => vidashort.Router.back());
+    document.querySelector('[data-nav="viewer"]').addEventListener('click', () => {
+      vidashort.Storage.setRole('viewer');
+      vidashort.Router.go('./05-auth-entry.html');
+    });
+  </script>
+</body>
+</html>

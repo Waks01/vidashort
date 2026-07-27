@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Share</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding: 0; overflow: hidden; background: rgba(0,0,0,0.5); }
+    .sh { position: fixed; inset: 0; z-index: 100; }
+    .sh__scrim { position: absolute; inset: 0; }
+    .sh__sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-bg-elev-1); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 8px 20px 24px; }
+    .sh__grab { width: 36px; height: 4px; background: var(--color-border-strong); border-radius: 2px; margin: 0 auto 8px; }
+    .sh__title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-md); margin-bottom: 12px; }
+    .sh__row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
+    .sh__btn { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+    .sh__icon { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; color: white; }
+    .sh__icon--copy { background: var(--color-accent-1); }
+    .sh__icon--wa { background: #25D366; }
+    .sh__icon--x { background: #000; }
+    .sh__icon--fb { background: #1877F2; }
+    .sh__icon--ig { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .sh__label { font-size: 10px; color: var(--color-text-2); }
+    .sh__link { display: flex; align-items: center; gap: 8px; padding: 12px 14px; background: var(--color-bg-elev-2); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 12px; }
+    .sh__link-text { flex: 1; color: var(--color-text-2); font-size: 12px; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sh__link-copy { padding: 4px 10px; background: var(--gradient-accent); color: white; border-radius: 999px; font-size: 11px; font-weight: 800; }
+  </style>
+</head>
+<body>
+  <div class="sh">
+    <div class="sh__scrim" id="scrim"></div>
+    <div class="sh__sheet">
+      <div class="sh__grab"></div>
+      <div class="sh__title">Share this drama</div>
+      <div class="sh__row">
+        <div class="sh__btn"><div class="sh__icon sh__icon--copy"><i class="ph-bold ph-link"></i></div><div class="sh__label">Copy</div></div>
+        <div class="sh__btn"><div class="sh__icon sh__icon--wa"><i class="ph-bold ph-whatsapp-logo"></i></div><div class="sh__label">WhatsApp</div></div>
+        <div class="sh__btn"><div class="sh__icon sh__icon--x"><i class="ph-bold ph-x-logo"></i></div><div class="sh__label">X</div></div>
+        <div class="sh__btn"><div class="sh__icon sh__icon--fb"><i class="ph-bold ph-facebook-logo"></i></div><div class="sh__label">Facebook</div></div>
+        <div class="sh__btn"><div class="sh__icon sh__icon--ig"><i class="ph-bold ph-instagram-logo"></i></div><div class="sh__label">Instagram</div></div>
+      </div>
+      <div class="sh__link">
+        <i class="ph ph-link" style="color:var(--color-text-3); font-size:18px;"></i>
+        <div class="sh__link-text">https://vidashort.app/s/the-ceos-secret-heir-1</div>
+        <div class="sh__link-copy" id="copy">Copy</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    document.getElementById('scrim').addEventListener('click', () => history.back());
+    document.getElementById('copy').addEventListener('click', () => {
+      vidashort.Toast.show('Link copied', 'success');
+      vidashort.Haptics.tap();
+    });
+  </script>
+</body>
+</html>

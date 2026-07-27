@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  logo-3d-v.svg — STOPGAP reconstruction of the 3D V-Forward brand mark.
+  Brand spec: docs/brand/00-overview.md § 9.
+
+  The 3D V glyph is geometry only (no font fallback risk). The "ida" and
+  "short" wordmark uses <text> with Google Fonts Playfair Display italic —
+  this renders correctly in browsers (the prototype already loads Playfair
+  via docs/brand/10-typography.md) but sharp + librsvg will fall back to
+  Georgia. That's the same known limitation splash-logo.svg has.
+
+  TODO(brand): replace with a Figma source where the wordmark is baked
+  to <path>. Save as logo-3d-v.baked.svg and the generator will pick
+  it up automatically.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 220" width="600" height="220">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,800;1,800&amp;display=swap');
+      .wordmark   { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-style: italic; fill: #f5e9d4; }
+      .wordmark-sm { font-family: 'Playfair Display', Georgia, serif; font-weight: 800; font-style: italic; fill: #f5e9d4; }
+    </style>
+
+    <linearGradient id="v-front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ff4d80"/>
+      <stop offset="50%" stop-color="#ff1f5a"/>
+      <stop offset="100%" stop-color="#b3002b"/>
+    </linearGradient>
+    <linearGradient id="v-side" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#7a001e"/>
+      <stop offset="100%" stop-color="#4a0014"/>
+    </linearGradient>
+    <linearGradient id="v-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#fff5c4" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff4d80" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="v-rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffe27a"/>
+      <stop offset="100%" stop-color="#d4a017"/>
+    </linearGradient>
+    <radialGradient id="v-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#ff1f5a" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ff1f5a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Halo behind V -->
+  <ellipse cx="120" cy="110" rx="110" ry="115" fill="url(#v-halo)"/>
+
+  <!-- 3D V glyph -->
+  <g transform="translate(30, 0) scale(0.55)">
+    <g opacity="0.85">
+      <path d="M 40 50 L 130 50 L 195 250 L 260 50 L 350 50 L 260 320 L 195 320 Z" fill="url(#v-side)"/>
+      <path d="M 260 50 L 380 150 L 380 200 L 260 320 Z" fill="url(#v-side)"/>
+    </g>
+    <path d="M 40 50 L 130 50 L 195 250 L 260 50 L 350 50 L 260 320 L 195 320 Z" fill="url(#v-front)"/>
+    <path d="M 40 50 L 130 50 L 135 64 L 45 64 Z" fill="url(#v-top)"/>
+    <path d="M 260 50 L 350 50 L 346 64 L 264 64 Z" fill="url(#v-top)"/>
+    <path d="M 130 50 L 195 250 L 197 250 L 132 50 Z" fill="url(#v-rim)" opacity="0.55"/>
+    <path d="M 260 50 L 380 150 L 380 200 L 260 320 Z" fill="url(#v-front)"/>
+    <path d="M 260 50 L 380 150 L 378 158 L 265 64 Z" fill="url(#v-top)"/>
+  </g>
+
+  <!-- "ida" — Playfair 800 italic, cream -->
+  <text x="245" y="175" class="wordmark" font-size="180">ida</text>
+
+  <!-- "short" — same font, ~75% size, ~5px closer to baseline -->
+  <text x="420" y="175" class="wordmark-sm" font-size="135">short</text>
+</svg>

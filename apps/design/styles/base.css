@@ -1,0 +1,310 @@
+/* ========================================================================
+   vidashort — Base styles
+   Reset + body + .phone-frame + typography base
+   ======================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text-1);
+  background: var(--color-bg);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+img, video, svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* ============== Typography utility classes ============== */
+.font-display { font-family: var(--font-display); }
+.font-body    { font-family: var(--font-body); }
+.font-mono    { font-family: var(--font-mono); }
+
+.t-display-xl {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-style: italic;
+  font-size: var(--text-5xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-style: italic;
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+.t-display-sm {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+}
+.t-h1 {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-snug);
+}
+.t-h2 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+.t-body { font-size: var(--text-base); line-height: var(--leading-normal); }
+.t-body-sm { font-size: var(--text-sm); line-height: var(--leading-normal); }
+.t-caption { font-size: var(--text-xs); line-height: var(--leading-normal); color: var(--color-text-2); }
+.t-eyebrow {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-text-2);
+}
+.t-coin {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(var(--glow-text-gold));
+}
+.t-vip {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--color-gold-1);
+}
+
+.text-center { text-align: center; }
+.text-gradient-accent {
+  background: var(--gradient-accent-hot);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.text-gradient-gold {
+  background: var(--gradient-gold-hot);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ============== Phone frame (desktop) ============== */
+.screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-bg);
+  isolation: isolate;
+}
+
+@media (min-width: 768px) {
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a1a;
+    padding: 24px;
+    overflow: auto;        /* let the user scroll the phone-frame on short viewports */
+    min-height: 100vh;
+  }
+  .screen {
+    width: var(--phone-width);
+    height: var(--phone-height);
+    max-height: calc(100vh - 48px);  /* never taller than the viewport */
+    border-radius: 44px;
+    border: var(--bezel) solid #0d0d0d;
+    box-shadow:
+      0 0 0 1px #333,
+      0 32px 80px rgba(0, 0, 0, 0.6),
+      0 0 0 8px #1a1a1a;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .screen::before {
+    /* Notch */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--notch-width);
+    height: var(--notch-height);
+    background: #0d0d0d;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    z-index: 9999;
+    pointer-events: none;
+  }
+  .screen::after {
+    /* Home indicator */
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 134px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-pill);
+    z-index: 9999;
+    pointer-events: none;
+  }
+}
+
+/* Hide phone-frame chrome on actual mobile (notch handled by OS) */
+@media (max-width: 767px) {
+  .screen::before, .screen::after { display: none; }
+}
+
+/* Safe area padding helpers (use on top bar / bottom nav) */
+.safe-top    { padding-top: env(safe-area-inset-top, 0); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+
+/* ============== Utility ============== */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-1 { flex: 1; min-height: 0; min-width: 0; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-6 { gap: var(--space-6); }
+.hidden { display: none !important; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.inset-0 { inset: 0; }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.text-text-2 { color: var(--color-text-2); }
+.text-text-3 { color: var(--color-text-3); }
+.text-accent { color: var(--color-accent-1); }
+.text-gold { color: var(--color-gold-1); }
+.text-success { color: var(--color-success); }
+.text-error { color: var(--color-error); }
+.uppercase { text-transform: uppercase; }
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ============== Animations ============== */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes scale-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes slide-down {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes screen-in {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes screen-in-back {
+  from { transform: translateX(-20px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* On mobile, the screen IS the viewport; on desktop it's the phone frame */
+.screen { animation: screen-in var(--duration-slow) var(--ease-out); }
+.screen[data-direction="back"] { animation: screen-in-back var(--duration-slow) var(--ease-out); }

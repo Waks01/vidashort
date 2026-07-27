@@ -1,0 +1,9 @@
+{
+  "name": "vidashort",
+  "private": true,
+  "scripts": {
+    "mobile": "cd mobile && npx expo start",
+    "typecheck": "cd mobile && npx tsc --noEmit",
+    "lint": "cd mobile && npx expo lint"
+  }
+}

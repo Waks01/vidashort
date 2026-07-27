@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Empty state</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .em { padding: 0 20px 24px; }
+    .em__group { margin-bottom: 32px; }
+    .em__group h2 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-md); margin-bottom: 8px; padding: 0 4px; }
+    .es { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 48px 20px; text-align: center; }
+    .es i { font-size: 64px; color: var(--color-text-3); margin-bottom: 12px; display: block; }
+    .es h3 { font-weight: 800; font-size: 15px; }
+    .es p { color: var(--color-text-2); font-size: 12px; margin-top: 6px; max-width: 260px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+    .es .btn { margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Empty states"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="em">
+      <div class="em__group">
+        <h2>1. Library is empty</h2>
+        <div class="es">
+          <i class="ph-duotone ph-bookmark-simple"></i>
+          <h3>Nothing here yet</h3>
+          <p>Start watching a drama and your library will fill up automatically.</p>
+          <a class="btn btn-primary" href="./10-home.html">Browse drama</a>
+        </div>
+      </div>
+
+      <div class="em__group">
+        <h2>2. Search returned nothing</h2>
+        <div class="es">
+          <i class="ph-duotone ph-magnifying-glass"></i>
+          <h3>No dramas found</h3>
+          <p>Try a different keyword, or check out what's trending now.</p>
+          <a class="btn btn-secondary" href="./11-discover.html">See what's hot</a>
+        </div>
+      </div>
+
+      <div class="em__group">
+        <h2>3. No notifications</h2>
+        <div class="es">
+          <i class="ph-duotone ph-bell-slash"></i>
+          <h3>You're all caught up</h3>
+          <p>We'll let you know when a new episode drops or a creator you follow uploads.</p>
+        </div>
+      </div>
+
+      <div class="em__group">
+        <h2>4. Empty watchlist</h2>
+        <div class="es">
+          <i class="ph-duotone ph-clock"></i>
+          <h3>Save for later</h3>
+          <p>Tap the bookmark on any series to save it to your watchlist.</p>
+          <a class="btn btn-primary" href="./11-discover.html">Find a drama</a>
+        </div>
+      </div>
+
+      <div class="em__group">
+        <h2>5. Empty transaction history</h2>
+        <div class="es">
+          <i class="ph-duotone ph-receipt"></i>
+          <h3>No transactions yet</h3>
+          <p>Your purchases and rewards will appear here.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+</body>
+</html>

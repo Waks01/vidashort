@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Series analytics</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; }
+    .an { padding: 0 20px; }
+    .an__head { padding: 16px 0; }
+    .an__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-xl); }
+    .an__range { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
+    .an__range::-webkit-scrollbar { display: none; }
+    .an__bigcard { background: linear-gradient(135deg, rgba(255,226,122,0.10), rgba(212,160,23,0.04)); border: 1px solid rgba(255,226,122,0.3); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
+    .an__bigcard-label { font-size: var(--text-xs); color: var(--color-gold-1); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+    .an__bigcard-val { font-family: var(--font-body); font-weight: 800; font-size: 40px; color: var(--color-text-1); line-height: 1.1; margin: 4px 0; }
+    .an__bigcard-sub { color: var(--color-text-2); font-size: var(--text-sm); }
+    .an__kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .an__kpi { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; }
+    .an__kpi-val { font-weight: 800; font-size: var(--text-xl); color: var(--color-text-1); font-variant-numeric: tabular-nums; }
+    .an__kpi-lbl { font-size: 11px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .an__kpi-delta { font-size: 11px; color: var(--color-success); font-weight: 700; margin-top: 4px; }
+    .an__chart { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; }
+    .an__chart-title { font-weight: 700; font-size: var(--text-sm); margin-bottom: 12px; }
+    .an__bars { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
+    .an__bar { flex: 1; background: var(--gradient-accent); border-radius: 3px 3px 0 0; min-height: 4px; opacity: 0.6; transition: opacity var(--duration-fast); }
+    .an__bar:hover { opacity: 1; }
+    .an__bar--peak { background: var(--gradient-gold); opacity: 1; }
+    .an__breakdown { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; }
+    .an__breakdown-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+    .an__breakdown-row:last-child { border-bottom: none; }
+    .an__bd-thumb { width: 40px; height: 56px; border-radius: 4px; background-size: cover; background-position: center; flex-shrink: 0; }
+    .an__bd-name { flex: 1; font-size: var(--text-sm); font-weight: 600; }
+    .an__bd-stat { text-align: right; }
+    .an__bd-stat-val { font-weight: 800; color: var(--color-gold-1); font-size: var(--text-sm); }
+    .an__bd-stat-lbl { font-size: 10px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Analytics" data-back="true"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="an">
+      <div class="an__head">
+        <div class="an__title">Performance</div>
+      </div>
+
+      <div class="an__range">
+        <button class="chip">7d</button>
+        <button class="chip chip--selected">30d</button>
+        <button class="chip">90d</button>
+        <button class="chip">All time</button>
+      </div>
+
+      <div class="an__bigcard">
+        <div class="an__bigcard-label">Estimated payout (30d)</div>
+        <div class="an__bigcard-val" id="payout">₦0</div>
+        <div class="an__bigcard-sub" id="payoutSub">From 0 paid unlocks</div>
+      </div>
+
+      <div class="an__kpis">
+        <div class="an__kpi">
+          <div class="an__kpi-val" id="kViews">0</div>
+          <div class="an__kpi-lbl">Total views</div>
+          <div class="an__kpi-delta">↑ 12%</div>
+        </div>
+        <div class="an__kpi">
+          <div class="an__kpi-val" id="kUnlocks">0</div>
+          <div class="an__kpi-lbl">Paid unlocks</div>
+          <div class="an__kpi-delta">↑ 24%</div>
+        </div>
+        <div class="an__kpi">
+          <div class="an__kpi-val" id="kAdRev">₦0</div>
+          <div class="an__kpi-lbl">Ad revenue share</div>
+        </div>
+        <div class="an__kpi">
+          <div class="an__kpi-val" id="kFollowers">0</div>
+          <div class="an__kpi-lbl">Followers</div>
+          <div class="an__kpi-delta">↑ 8%</div>
+        </div>
+      </div>
+
+      <div class="an__chart">
+        <div class="an__chart-title">Daily views (30 days)</div>
+        <div class="an__bars" id="bars"></div>
+      </div>
+
+      <div class="an__breakdown">
+        <div style="font-weight:700; font-size:var(--text-sm); margin-bottom:8px;">By series</div>
+        <div id="breakdown"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    if (!vidashort.Auth.requireRole('creator')) {}
+    const profile = vidashort.Storage.getCreatorProfile() || vidashort.MockData.creators[0];
+    const a = vidashort.MockData.creatorAnalytics[profile.id] || { views: 0, unlocks: 0, dailyViews: [], seriesBreakdown: [] };
+    const earnings = vidashort.Storage.getCreatorEarnings();
+
+    document.getElementById('payout').textContent = '₦' + (a.views ? (a.unlocks * vidashort.MockData.ECONOMY.episodeCostCoins * vidashort.MockData.ECONOMY.revenueSplit.creator / 10).toLocaleString(undefined, { maximumFractionDigits: 0 }) : 0);
+    document.getElementById('payoutSub').textContent = `From ${(a.unlocks || 0).toLocaleString()} paid unlocks × 60% creator share`;
+    document.getElementById('kViews').textContent = (a.views || 0).toLocaleString();
+    document.getElementById('kUnlocks').textContent = (a.unlocks || 0).toLocaleString();
+    document.getElementById('kAdRev').textContent = '₦' + (a.views ? Math.round(a.views / 1000 * 2).toLocaleString() : 0);
+    document.getElementById('kFollowers').textContent = (profile.followers || 0).toLocaleString();
+
+    // Chart
+    const bars = document.getElementById('bars');
+    if (a.dailyViews && a.dailyViews.length) {
+      const peak = Math.max(...a.dailyViews.map(d => d.views));
+      bars.innerHTML = a.dailyViews.map(d => {
+        const h = (d.views / peak) * 100;
+        const peakDay = d.views === peak;
+        return `<div class="an__bar ${peakDay ? 'an__bar--peak' : ''}" style="height:${h}%" title="Day ${d.day + 1}: ${d.views.toLocaleString()}"></div>`;
+      }).join('');
+    } else {
+      bars.innerHTML = '<div style="color:var(--color-text-3); font-size:12px; padding:20px; text-align:center;">No data yet — publish a series to start tracking.</div>';
+    }
+
+    // Breakdown
+    const breakdown = document.getElementById('breakdown');
+    if (a.seriesBreakdown && a.seriesBreakdown.length) {
+      breakdown.innerHTML = a.seriesBreakdown.map(s => {
+        const seriesObj = vidashort.MockData.getSeriesById(s.seriesId) || {};
+        return `
+          <div class="an__breakdown-row">
+            <div class="an__bd-thumb" style="background-image:url('${seriesObj.cover || ''}')"></div>
+            <div class="an__bd-name">${s.title}</div>
+            <div class="an__bd-stat">
+              <div class="an__bd-stat-val">₦${s.earnings.toLocaleString()}</div>
+              <div class="an__bd-stat-lbl">${s.unlocks.toLocaleString()} unlocks</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      breakdown.innerHTML = '<div style="color:var(--color-text-3); font-size:12px; padding:20px; text-align:center;">Upload a series to see per-series breakdown.</div>';
+    }
+  </script>
+</body>
+</html>

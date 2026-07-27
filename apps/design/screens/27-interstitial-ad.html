@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Sponsored</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding: 0; overflow: hidden; background: #000; }
+    .is { position: fixed; inset: 0; display: flex; flex-direction: column; }
+    .is__bg { position: absolute; inset: 0; background: linear-gradient(135deg, #2a0010, var(--color-accent-1), var(--color-accent-2)); background-size: 220% 220%; animation: drift 12s ease-in-out infinite; }
+    .is__bg::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 100%); }
+    @keyframes drift { 0%,100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
+    .is__top { position: relative; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; }
+    .is__pill { padding: 4px 10px; background: rgba(0,0,0,0.6); border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: white; }
+    .is__x { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.6); display: grid; place-items: center; color: white; font-size: 14px; cursor: pointer; }
+    .is__body { flex: 1; position: relative; display: grid; place-items: center; padding: 24px; text-align: center; color: white; }
+    .is__cat { display: inline-block; padding: 3px 10px; background: var(--gradient-accent); border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+    .is__title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 32px; line-height: 1.1; }
+    .is__sub { color: rgba(255,255,255,0.85); font-size: 14px; margin-top: 6px; max-width: 80%; }
+    .is__cta { margin-top: 20px; padding: 12px 24px; background: var(--gradient-accent); color: white; border-radius: 999px; font-weight: 800; font-size: 13px; display: inline-block; }
+    .is__bottom { position: relative; padding: 12px 18px; text-align: center; color: rgba(255,255,255,0.6); font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="is">
+    <div class="is__bg"></div>
+    <div class="is__top">
+      <div class="is__pill">Sponsored Drama</div>
+      <div class="is__x" id="x"><span id="cd">5</span></div>
+    </div>
+    <div class="is__body">
+      <div>
+        <div class="is__cat">CEO Romance</div>
+        <div class="is__title">The Forbidden<br>Bride</div>
+        <div class="is__sub">A billionaire. A secret. A wedding that changes everything.</div>
+        <a class="is__cta">Watch now</a>
+      </div>
+    </div>
+    <div class="is__bottom">Ad closes automatically in <span id="cd2">5</span>s</div>
+  </div>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    let total = 5;
+    const cd1 = document.getElementById('cd');
+    const cd2 = document.getElementById('cd2');
+    const x = document.getElementById('x');
+    const iv = setInterval(() => {
+      total -= 1;
+      cd1.textContent = total;
+      cd2.textContent = total;
+      if (total <= 3) x.innerHTML = '<i class="ph-bold ph-x"></i>';
+      if (total <= 0) {
+        clearInterval(iv);
+        const next = new URLSearchParams(location.search).get('next');
+        if (next) location.href = './14-episode-player.html?ep=' + next;
+        else history.back();
+      }
+    }, 1000);
+
+    x.addEventListener('click', () => {
+      if (total > 3) return; // forced-watch 3s
+      clearInterval(iv);
+      const next = new URLSearchParams(location.search).get('next');
+      if (next) location.href = './14-episode-player.html?ep=' + next;
+      else history.back();
+    });
+  </script>
+</body>
+</html>

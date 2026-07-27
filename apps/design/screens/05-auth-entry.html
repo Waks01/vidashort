@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Sign in</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .auth-entry {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 0 24px;
+    }
+    .auth-entry__top {
+      padding: 56px 0 24px;
+      text-align: center;
+    }
+    .auth-entry__logo {
+      width: 60px;
+      margin: 0 auto 16px;
+    }
+    .auth-entry__title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-style: italic;
+      font-size: var(--text-2xl);
+      margin-bottom: 8px;
+    }
+    .auth-entry__sub {
+      color: var(--color-text-2);
+      font-size: var(--text-base);
+    }
+    .auth-entry__providers {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+    .auth-entry__divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--color-text-3);
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-widest);
+      text-transform: uppercase;
+      margin: 8px 0;
+    }
+    .auth-entry__divider::before, .auth-entry__divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+    .auth-entry__footer {
+      padding: 16px 0 32px;
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--color-text-3);
+      line-height: 1.5;
+    }
+    .auth-entry__footer a { color: var(--color-accent-3); text-decoration: underline; }
+    .provider-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 52px;
+      border-radius: var(--radius-pill);
+      font-weight: 700;
+      font-size: var(--text-base);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+    .provider-btn i { font-size: 20px; }
+    .provider-btn--apple { background: white; color: #000; }
+    .provider-btn--apple:hover { filter: brightness(0.95); }
+    .provider-btn--google { background: var(--color-bg-elev-2); color: var(--color-text-1); border: 1.5px solid var(--color-border-strong); }
+    .provider-btn--google:hover { background: var(--color-bg-elev-3); }
+    .provider-btn--email { background: var(--gradient-accent); color: white; box-shadow: var(--shadow-card); }
+    .provider-btn--email:hover { filter: brightness(1.1); }
+  </style>
+</head>
+<body>
+  <main class="screen" data-direction="forward">
+    <div class="auth-entry">
+      <div class="auth-entry__top">
+        <img class="auth-entry__logo" src="../assets/icons/splash-logo.svg" alt="vidashort">
+        <h1 class="auth-entry__title">Sign in to start watching</h1>
+        <p class="auth-entry__sub">Endless drama, one swipe away.</p>
+      </div>
+
+      <div class="auth-entry__providers">
+        <button class="provider-btn provider-btn--apple" id="apple">
+          <i class="ph-bold ph-apple-logo"></i>
+          Continue with Apple
+        </button>
+        <button class="provider-btn provider-btn--google" id="google">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21.35 11.1H12v3.2h5.35c-.5 2.4-2.5 3.7-5.35 3.7-3.25 0-5.9-2.65-5.9-5.9s2.65-5.9 5.9-5.9c1.45 0 2.75.5 3.8 1.4l2.4-2.4C16.55 3.85 14.45 3 12 3 7.05 3 3 7.05 3 12s4.05 9 9 9c4.65 0 8.7-3.4 8.7-9 0-.6-.05-1.3-.35-1.9z"/></svg>
+          Continue with Google
+        </button>
+        <div class="auth-entry__divider">or</div>
+        <button class="provider-btn provider-btn--email" id="email">
+          <i class="ph-bold ph-envelope"></i>
+          Continue with email
+        </button>
+      </div>
+
+      <div class="auth-entry__footer">
+        By continuing you agree to our<br>
+        <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script>
+    function socialAuth(name) {
+      vidashort.Haptics.tap();
+      vidashort.Toast.show(`Signing in with ${name}…`, 'info');
+      setTimeout(() => {
+        vidashort.Storage.setAuth({ provider: name.toLowerCase(), name: 'Maya', email: 'maya@example.com' });
+        vidashort.Toast.show(`Welcome to vidashort!`, 'success');
+        vidashort.Haptics.success();
+        vidashort.Confetti.burst({ originX: 50, originY: 50 });
+        setTimeout(() => vidashort.Router.go('./10-home.html'), 600);
+      }, 700);
+    }
+    document.getElementById('apple').addEventListener('click', () => socialAuth('Apple'));
+    document.getElementById('google').addEventListener('click', () => socialAuth('Google'));
+    document.getElementById('email').addEventListener('click', () => vidashort.Router.go('./06-sign-up.html'));
+  </script>
+</body>
+</html>

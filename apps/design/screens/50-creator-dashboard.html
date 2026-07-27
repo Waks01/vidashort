@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Creator dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; background: var(--color-bg); }
+    .cd { padding: 0 20px; }
+    .cd__welcome { padding: 20px 0 8px; }
+    .cd__hi { color: var(--color-text-2); font-size: var(--text-sm); }
+    .cd__name { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-2xl); margin-top: 4px; }
+    .cd__verified { display: inline-flex; align-items: center; gap: 4px; background: var(--gradient-gold); color: #1a0e00; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+    .cd__balance {
+      margin: 16px 0 8px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(255,226,122,0.10), rgba(212,160,23,0.04));
+      border: 1px solid rgba(255,226,122,0.3);
+      border-radius: var(--radius-lg);
+    }
+    .cd__balance-label { font-size: var(--text-xs); color: var(--color-gold-1); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+    .cd__balance-amt { font-family: var(--font-body); font-weight: 800; font-size: 44px; font-variant-numeric: tabular-nums; color: var(--color-text-1); line-height: 1.1; margin: 4px 0; }
+    .cd__balance-naira { color: var(--color-text-2); font-size: var(--text-sm); }
+    .cd__balance-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .cd__kpis { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 16px 0; }
+    .cd__kpi { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 8px; text-align: center; }
+    .cd__kpi-val { font-weight: 800; font-size: var(--text-lg); color: var(--color-text-1); font-variant-numeric: tabular-nums; }
+    .cd__kpi-lbl { font-size: 10px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .cd__section { margin: 24px 0 8px; }
+    .cd__section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cd__section-title h2 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-lg); }
+    .cd__section-title a { font-size: var(--text-xs); color: var(--color-accent-3); font-weight: 600; cursor: pointer; }
+    .cd__quick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .cd__quick-item { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; transition: all var(--duration-fast); }
+    .cd__quick-item:hover { border-color: var(--color-accent-1); transform: translateY(-1px); }
+    .cd__quick-item i { font-size: 22px; color: var(--color-accent-1); }
+    .cd__quick-item--gold i { color: var(--color-gold-1); }
+    .cd__quick-label { font-weight: 700; font-size: var(--text-sm); }
+    .cd__quick-sub { font-size: 11px; color: var(--color-text-2); }
+    .cd__series { display: flex; flex-direction: column; gap: 10px; }
+    .cd__series-row { display: flex; gap: 12px; align-items: center; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; cursor: pointer; }
+    .cd__series-row:hover { border-color: var(--color-border-strong); }
+    .cd__series-thumb { width: 56px; height: 80px; border-radius: var(--radius-sm); background-size: cover; background-position: center; flex-shrink: 0; }
+    .cd__series-body { flex: 1; min-width: 0; }
+    .cd__series-title { font-weight: 700; font-size: var(--text-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cd__series-meta { font-size: 11px; color: var(--color-text-3); display: flex; gap: 8px; margin-top: 4px; }
+    .cd__series-stat { text-align: right; font-size: var(--text-xs); }
+    .cd__series-stat-val { font-weight: 800; color: var(--color-gold-1); }
+    .cd__series-stat-lbl { color: var(--color-text-3); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .cd__status { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 4px; }
+    .cd__status--approved { background: rgba(46, 212, 122, 0.15); color: var(--color-success); }
+    .cd__status--pending  { background: rgba(255, 182, 72, 0.15); color: var(--color-warning); }
+    .cd__status--rejected { background: rgba(255, 56, 56, 0.15); color: var(--color-error); }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Creator Studio"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="cd">
+      <div class="cd__welcome">
+        <div class="cd__hi">Welcome back,</div>
+        <div class="cd__name" id="name">Creator</div>
+      </div>
+
+      <div class="cd__balance">
+        <div class="cd__balance-label">Pending payout</div>
+        <div class="cd__balance-amt" id="amt">₦0</div>
+        <div class="cd__balance-naira" id="pts">0 loyalty points</div>
+        <div class="cd__balance-actions">
+          <button class="btn btn--gold btn--sm" style="flex:1;" data-nav="payouts">Cash out</button>
+          <button class="btn btn--secondary btn--sm" style="flex:1;" data-nav="upload">Upload</button>
+        </div>
+      </div>
+
+      <div class="cd__kpis">
+        <div class="cd__kpi"><div class="cd__kpi-val" id="kViews">0</div><div class="cd__kpi-lbl">Views (30d)</div></div>
+        <div class="cd__kpi"><div class="cd__kpi-val" id="kUnlocks">0</div><div class="cd__kpi-lbl">Unlocks</div></div>
+        <div class="cd__kpi"><div class="cd__kpi-val" id="kSeries">0</div><div class="cd__kpi-lbl">Series</div></div>
+      </div>
+
+      <div class="cd__section">
+        <div class="cd__section-title"><h2>Quick actions</h2></div>
+        <div class="cd__quick">
+          <div class="cd__quick-item" data-nav="upload">
+            <i class="ph-bold ph-upload-simple"></i>
+            <div class="cd__quick-label">Upload series</div>
+            <div class="cd__quick-sub">Add episodes + thumbnail</div>
+          </div>
+          <div class="cd__quick-item cd__quick-item--gold" data-nav="payouts">
+            <i class="ph-bold ph-money"></i>
+            <div class="cd__quick-label">Cash out</div>
+            <div class="cd__quick-sub">Min ₦5,000</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cd__section">
+        <div class="cd__section-title">
+          <h2>Your series</h2>
+          <a data-nav="series">View all</a>
+        </div>
+        <div class="cd__series" id="series"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    if (!vidashort.Auth.requireRole('creator')) {}
+    const profile = vidashort.Storage.getCreatorProfile() || vidashort.MockData.creators[0];
+    const earnings = vidashort.Storage.getCreatorEarnings();
+    const mySeries = vidashort.Storage.getCreatorSeries().length
+      ? vidashort.Storage.getCreatorSeries()
+      : vidashort.MockData.creatorSeries.filter(s => s.creatorId === profile.id);
+
+    document.getElementById('name').innerHTML = profile.name + (profile.verified ? ' <span class="cd__verified"><i class="ph-fill ph-seal-check" style="font-size:11px;"></i> VERIFIED</span>' : '');
+    vidashort.animateCoinCount(document.getElementById('amt'), 0, earnings.pendingNaira || (profile.pendingPayoutNaira || 0), 700);
+    // (The class uses rupee symbol only as visual; naira is also ₦)
+    document.getElementById('amt').textContent = '₦' + (earnings.pendingNaira || profile.pendingPayoutNaira || 0).toLocaleString();
+    document.getElementById('pts').textContent = (earnings.pendingCoins || profile.loyaltyPoints || 0).toLocaleString() + ' loyalty points';
+
+    // KPIs from analytics or stub
+    const a = vidashort.MockData.creatorAnalytics[profile.id] || { views: 0, unlocks: 0, seriesCount: mySeries.length };
+    document.getElementById('kViews').textContent = (a.views || 0).toLocaleString();
+    document.getElementById('kUnlocks').textContent = (a.unlocks || 0).toLocaleString();
+    document.getElementById('kSeries').textContent = mySeries.length;
+
+    const list = document.getElementById('series');
+    if (!mySeries.length) {
+      list.innerHTML = '<div style="text-align:center; color:var(--color-text-3); font-size:13px; padding:24px 0;">No series yet. <a data-nav="upload" style="color:var(--color-accent-3); font-weight:600; cursor:pointer;">Upload your first one →</a></div>';
+    } else {
+      list.innerHTML = mySeries.map(s => `
+        <div class="cd__series-row" data-nav="upload">
+          <div class="cd__series-thumb" style="background-image:url('${s.cover}')"></div>
+          <div class="cd__series-body">
+            <div class="cd__series-title">${s.title}</div>
+            <div class="cd__series-meta">
+              <span>${s.totalEpisodes} ep</span>
+              <span>•</span>
+              <span>${(s.views || 0).toLocaleString()} views</span>
+            </div>
+            <div style="margin-top:6px;"><span class="cd__status cd__status--${s.moderationStatus}">${s.moderationStatus}</span></div>
+          </div>
+          <div class="cd__series-stat">
+            <div class="cd__series-stat-val">₦${((s.loyaltyCoins || 0) / 10).toLocaleString()}</div>
+            <div class="cd__series-stat-lbl">earned</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Quick-action routing
+    document.querySelectorAll('[data-nav]').forEach(el => el.addEventListener('click', () => {
+      const map = {
+        upload: './52-creator-upload.html',
+        series: './51-creator-series.html',
+        payouts: './54-creator-payouts.html',
+      };
+      if (map[el.dataset.nav]) vidashort.Router.go(map[el.dataset.nav]);
+    }));
+  </script>
+</body>
+</html>

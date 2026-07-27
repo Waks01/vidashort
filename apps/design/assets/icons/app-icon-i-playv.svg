@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  app-icon-i-playv.svg — STOPGAP / alt app icon concept used as favicon.
+  Used as the favicon link in apps/design/index.html and 00-splash.html.
+  Simpler than the production app-icon.svg: a flat V with the right arm
+  extending into a play triangle, no 3D extrude.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#ff4d80"/>
+      <stop offset="55%" stop-color="#ff1f5a"/>
+      <stop offset="100%" stop-color="#b3002b"/>
+    </linearGradient>
+    <linearGradient id="vflat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ff4d80"/>
+      <stop offset="100%" stop-color="#b3002b"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="url(#halo)"/>
+  <!-- Flat V + play triangle -->
+  <path d="M 260 290 L 410 290 L 512 600 L 614 290 L 764 290 L 614 740 L 512 740 Z" fill="url(#vflat)"/>
+  <path d="M 614 290 L 820 460 L 820 540 L 614 740 Z" fill="url(#vflat)"/>
+</svg>

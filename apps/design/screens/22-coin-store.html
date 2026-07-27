@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Coin store</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .cs { padding: 0 20px; }
+    .cs__head { text-align: center; padding: 12px 0; }
+    .cs__head h1 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 28px; }
+    .cs__head p { color: var(--color-text-2); font-size: 13px; margin-top: 4px; }
+    .cs__pay-toggle { display: flex; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: 999px; padding: 4px; margin: 12px 0; }
+    .cs__pay-toggle button { flex: 1; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; color: var(--color-text-2); }
+    .cs__pay-toggle button.is-active { background: var(--gradient-accent); color: white; }
+    .cs__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .cs__pack { position: relative; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px 12px; text-align: center; cursor: pointer; transition: all var(--duration-fast); }
+    .cs__pack:hover { border-color: var(--color-accent-1); transform: translateY(-2px); }
+    .cs__pack--best { border-color: var(--color-gold-2); background: linear-gradient(180deg, rgba(255,200,80,0.08), transparent); }
+    .cs__pack--most { border-color: var(--color-accent-1); background: linear-gradient(180deg, rgba(255,31,90,0.08), transparent); }
+    .cs__pack-badge { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: white; }
+    .cs__pack--best .cs__pack-badge { background: var(--gradient-gold); color: #1a0e00; }
+    .cs__pack--most .cs__pack-badge { background: var(--gradient-accent); }
+    .cs__pack-coins { display: inline-flex; align-items: center; gap: 4px; font-size: 22px; font-weight: 800; color: var(--color-gold-1); font-variant-numeric: tabular-nums; }
+    .cs__pack-bonus { font-size: 11px; color: var(--color-success); font-weight: 700; margin-top: 4px; }
+    .cs__pack-price { font-size: 16px; font-weight: 800; margin-top: 6px; }
+    .cs__pack-equivalent { font-size: 10px; color: var(--color-text-3); margin-top: 2px; }
+    .cs__trust { display: flex; gap: 12px; justify-content: center; margin: 16px 0; color: var(--color-text-3); font-size: 10px; }
+    .cs__trust span { display: inline-flex; align-items: center; gap: 4px; }
+    .cs__trust i { color: var(--color-success); }
+    .cs__faq { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; }
+    .cs__faq-row { padding: 14px 16px; border-bottom: 1px solid var(--color-border); cursor: pointer; }
+    .cs__faq-row:last-child { border-bottom: none; }
+    .cs__faq-q { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 13px; }
+    .cs__faq-a { color: var(--color-text-2); font-size: 12px; line-height: 1.5; margin-top: 6px; display: none; }
+    .cs__faq-row.is-open .cs__faq-a { display: block; }
+    .cs__faq-row i { color: var(--color-text-3); }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Coin store" data-back="true"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="cs">
+      <div class="cs__head">
+        <h1>Top up coins</h1>
+        <p>10 coins = ₦1. Coins never expire.</p>
+      </div>
+
+      <div class="cs__pay-toggle">
+        <button class="is-active"><i class="ph-fill ph-apple-logo"></i> Apple Pay</button>
+        <button><i class="ph-bold ph-google-logo"></i> Google Play</button>
+      </div>
+
+      <div class="cs__grid" id="grid"></div>
+
+      <div class="cs__trust">
+        <span><i class="ph-bold ph-shield-check"></i> Secure payment</span>
+        <span><i class="ph-bold ph-x-circle"></i> No subscription</span>
+        <span><i class="ph-bold ph-arrow-counter-clockwise"></i> Cancel anytime</span>
+      </div>
+
+      <div class="cs__faq">
+        <div class="cs__faq-row">
+          <div class="cs__faq-q">Do coins expire? <i class="ph-bold ph-caret-down"></i></div>
+          <div class="cs__faq-a">No. Coins stay in your wallet until you spend them. We never reset your balance.</div>
+        </div>
+        <div class="cs__faq-row">
+          <div class="cs__faq-q">Can I get a refund? <i class="ph-bold ph-caret-down"></i></div>
+          <div class="cs__faq-a">Coin purchases follow Apple/Google refund policies. Contact support if you have an issue with a transaction.</div>
+        </div>
+        <div class="cs__faq-row">
+          <div class="cs__faq-q">How do I earn free coins? <i class="ph-bold ph-caret-down"></i></div>
+          <div class="cs__faq-a">Daily check-in (5–50 coins), watching rewarded ads (20 coins, up to 100/day), and inviting friends (500 each).</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const packs = vidashort.MockData.coinPacks;
+    const grid = document.getElementById('grid');
+    grid.innerHTML = packs.map(p => {
+      const cls = p.badge ? 'cs__pack--' + p.badge.toLowerCase().replace(' ', '-') : '';
+      const badge = p.badge ? `<div class="cs__pack-badge">${p.badge}</div>` : '';
+      const bonus = p.bonus ? `<div class="cs__pack-bonus">+${p.bonus} bonus</div>` : '';
+      return `
+        <div class="cs__pack ${cls}" data-id="${p.id}">
+          ${badge}
+          <div class="cs__pack-coins"><i class="ph-fill ph-coins"></i> ${p.coins + (p.bonus || 0)}</div>
+          ${bonus}
+          <div class="cs__pack-price">${p.price}</div>
+          <div class="cs__pack-equivalent">≈ ${Math.floor((p.coins + (p.bonus || 0)) / 25)} episodes</div>
+        </div>
+      `;
+    }).join('');
+
+    grid.addEventListener('click', e => {
+      const card = e.target.closest('.cs__pack');
+      if (!card) return;
+      const p = packs.find(x => x.id === card.dataset.id);
+      if (!p) return;
+      vidashort.Haptics.tap();
+      vidashort.Toast.show('Processing payment…', 'info');
+      setTimeout(() => {
+        const total = p.coins + (p.bonus || 0);
+        vidashort.Storage.setCoins(vidashort.Storage.getCoins() + total);
+        vidashort.Confetti.burst({ count: 60 });
+        vidashort.Toast.show(`+${total} coins added!`, 'success');
+      }, 1500);
+    });
+
+    document.querySelectorAll('.cs__faq-row').forEach(r => r.addEventListener('click', () => {
+      r.classList.toggle('is-open');
+    }));
+  </script>
+</body>
+</html>

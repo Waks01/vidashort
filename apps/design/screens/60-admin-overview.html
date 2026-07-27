@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Admin overview</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; }
+    .ad { padding: 0 20px; }
+    .ad__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-xl); padding: 16px 0 4px; }
+    .ad__range { font-size: 11px; color: var(--color-text-3); padding-bottom: 16px; }
+    .ad__revenue {
+      background: var(--gradient-accent);
+      color: white;
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .ad__revenue::after { content: ''; position: absolute; right: -30px; top: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+    .ad__revenue-label { font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; font-weight: 700; }
+    .ad__revenue-val { font-family: var(--font-body); font-weight: 800; font-size: 40px; line-height: 1.1; margin: 4px 0; font-variant-numeric: tabular-nums; }
+    .ad__revenue-sub { font-size: var(--text-sm); opacity: 0.85; }
+    .ad__revenue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); }
+    .ad__revenue-cell-val { font-weight: 800; font-size: var(--text-base); font-variant-numeric: tabular-nums; }
+    .ad__revenue-cell-lbl { font-size: 10px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+    .ad__kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .ad__kpi { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; }
+    .ad__kpi-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--color-bg-elev-2); display: grid; place-items: center; margin-bottom: 8px; font-size: 18px; }
+    .ad__kpi-val { font-weight: 800; font-size: var(--text-lg); color: var(--color-text-1); font-variant-numeric: tabular-nums; }
+    .ad__kpi-lbl { font-size: 10px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .ad__kpi-delta { font-size: 10px; color: var(--color-success); font-weight: 700; margin-top: 4px; }
+    .ad__section { margin: 20px 0 8px; }
+    .ad__section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .ad__section-title h2 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-lg); }
+    .ad__section-title a { font-size: var(--text-xs); color: var(--color-accent-3); font-weight: 600; cursor: pointer; }
+    .ad__row { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+    .ad__row-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--color-bg-elev-2); display: grid; place-items: center; font-size: 18px; color: var(--color-accent-1); flex-shrink: 0; }
+    .ad__row-body { flex: 1; min-width: 0; }
+    .ad__row-title { font-weight: 700; font-size: var(--text-sm); }
+    .ad__row-sub { font-size: 11px; color: var(--color-text-3); margin-top: 2px; }
+    .ad__row-stat { text-align: right; }
+    .ad__row-stat-val { font-weight: 800; color: var(--color-text-1); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+    .ad__row-stat-lbl { font-size: 10px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; }
+    .ad__alert { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255, 31, 90, 0.08); border: 1px solid rgba(255, 31, 90, 0.3); border-radius: var(--radius-md); margin-bottom: 8px; }
+    .ad__alert i { color: var(--color-accent-1); font-size: 18px; }
+    .ad__alert-body { flex: 1; font-size: var(--text-sm); }
+    .ad__alert-body strong { color: var(--color-text-1); }
+    .ad__alert-body span { color: var(--color-text-2); }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Admin"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="ad">
+      <div class="ad__title">Overview</div>
+      <div class="ad__range" id="range">Loading…</div>
+
+      <div class="ad__revenue">
+        <div class="ad__revenue-label">Platform revenue</div>
+        <div class="ad__revenue-val" id="rev">₦0</div>
+        <div class="ad__revenue-sub">Last 7 days • 40% of all paid unlocks + ads</div>
+        <div class="ad__revenue-grid">
+          <div><div class="ad__revenue-cell-val" id="gmv">₦0</div><div class="ad__revenue-cell-lbl">GMV</div></div>
+          <div><div class="ad__revenue-cell-val" id="creator">₦0</div><div class="ad__revenue-cell-lbl">Creator payouts</div></div>
+          <div><div class="ad__revenue-cell-val" id="ads">₦0</div><div class="ad__revenue-cell-lbl">Ad revenue</div></div>
+          <div><div class="ad__revenue-cell-val" id="subs">₦0</div><div class="ad__revenue-cell-lbl">Subscriptions</div></div>
+        </div>
+      </div>
+
+      <div class="ad__kpis">
+        <div class="ad__kpi">
+          <div class="ad__kpi-icon"><i class="ph-fill ph-users"></i></div>
+          <div class="ad__kpi-val" id="dau">0</div>
+          <div class="ad__kpi-lbl">DAU</div>
+          <div class="ad__kpi-delta">↑ 8% WoW</div>
+        </div>
+        <div class="ad__kpi">
+          <div class="ad__kpi-icon"><i class="ph-fill ph-user-plus"></i></div>
+          <div class="ad__kpi-val" id="signups">0</div>
+          <div class="ad__kpi-lbl">New signups</div>
+          <div class="ad__kpi-delta">↑ 14% WoW</div>
+        </div>
+        <div class="ad__kpi">
+          <div class="ad__kpi-icon"><i class="ph-fill ph-crown"></i></div>
+          <div class="ad__kpi-val" id="vip">0</div>
+          <div class="ad__kpi-lbl">Active VIP</div>
+          <div class="ad__kpi-delta">↑ 4%</div>
+        </div>
+        <div class="ad__kpi">
+          <div class="ad__kpi-icon"><i class="ph-fill ph-coins"></i></div>
+          <div class="ad__kpi-val" id="paid">0</div>
+          <div class="ad__kpi-lbl">Paying users</div>
+        </div>
+      </div>
+
+      <div class="ad__alert">
+        <i class="ph-fill ph-warning"></i>
+        <div class="ad__alert-body">
+          <strong id="capHits">0</strong> <span>users hit the 100-ad daily cap today</span>
+        </div>
+        <a class="ad__section-title" data-nav="ads" style="font-size:12px; color:var(--color-accent-3); cursor:pointer;">Review</a>
+      </div>
+
+      <div class="ad__section">
+        <div class="ad__section-title">
+          <h2>Moderation queue</h2>
+          <a data-nav="mod">View all</a>
+        </div>
+        <div id="mod"></div>
+      </div>
+
+      <div class="ad__section">
+        <div class="ad__section-title">
+          <h2>Pending payouts</h2>
+          <a data-nav="ads">Manage</a>
+        </div>
+        <div id="payouts"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    // Demo: ensure admin role is set
+    if (vidashort.Storage.getRole() !== 'admin') {
+      vidashort.Storage.setRole('admin');
+      vidashort.Storage.set('user.isAdmin', true);
+    }
+    const K = vidashort.MockData.adminKpis;
+    document.getElementById('range').textContent = K.range;
+    document.getElementById('rev').textContent = '₦' + K.platformRevenueNaira.toLocaleString();
+    document.getElementById('gmv').textContent = '₦' + K.gmvNaira.toLocaleString();
+    document.getElementById('creator').textContent = '₦' + K.creatorPayoutsNaira.toLocaleString();
+    document.getElementById('ads').textContent = '₦' + K.adRevenueNaira.toLocaleString();
+    document.getElementById('subs').textContent = '₦' + K.vipRevenueNaira.toLocaleString();
+    document.getElementById('dau').textContent = K.dau.toLocaleString();
+    document.getElementById('signups').textContent = K.newSignups.toLocaleString();
+    document.getElementById('vip').textContent = K.vipActive.toLocaleString();
+    document.getElementById('paid').textContent = K.paidUsers.toLocaleString();
+    document.getElementById('capHits').textContent = K.adCapHits.toLocaleString();
+
+    const mod = document.getElementById('mod');
+    mod.innerHTML = vidashort.MockData.moderationQueue.series.slice(0, 3).map(s => `
+      <div class="ad__row">
+        <div class="ad__row-icon" style="color:${s.priority === 'high' ? 'var(--color-error)' : 'var(--color-warning)'};"><i class="ph-fill ph-shield-warning"></i></div>
+        <div class="ad__row-body">
+          <div class="ad__row-title">${s.title}</div>
+          <div class="ad__row-sub">by @${s.submitter} • ${s.reason}</div>
+        </div>
+        <div class="ad__row-stat">
+          <div class="ad__row-stat-val" style="color:var(--color-warning);">${s.priority}</div>
+        </div>
+      </div>
+    `).join('');
+
+    const payouts = document.getElementById('payouts');
+    payouts.innerHTML = vidashort.MockData.payoutRequests.filter(p => p.status === 'pending').map(p => `
+      <div class="ad__row">
+        <div class="ad__row-icon"><i class="ph-fill ph-money"></i></div>
+        <div class="ad__row-body">
+          <div class="ad__row-title">@${p.creatorId}</div>
+          <div class="ad__row-sub">${p.method} ${p.account} • ${p.requestedAt}</div>
+        </div>
+        <div class="ad__row-stat">
+          <div class="ad__row-stat-val">₦${p.amountNaira.toLocaleString()}</div>
+          <div class="ad__row-stat-lbl">${p.amountCoins.toLocaleString()} coins</div>
+        </div>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('[data-nav]').forEach(el => el.addEventListener('click', () => {
+      const map = { mod: './61-admin-moderation.html', ads: './64-admin-ads.html' };
+      if (map[el.dataset.nav]) vidashort.Router.go(map[el.dataset.nav]);
+    }));
+  </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Pick your genres</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .gp {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 0 24px;
+    }
+    .gp__header {
+      padding: 56px 0 16px;
+    }
+    .gp__back {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      color: var(--color-text-1);
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .gp__back:hover { background: var(--color-bg-elev-1); }
+    .gp__title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-style: italic;
+      font-size: var(--text-3xl);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .gp__sub {
+      color: var(--color-text-2);
+      font-size: var(--text-base);
+    }
+    .gp__progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 24px 0 8px;
+    }
+    .gp__progress-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--color-bg-elev-2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .gp__progress-fill {
+      height: 100%;
+      background: var(--gradient-accent);
+      transition: width var(--duration-base) var(--ease-out);
+    }
+    .gp__progress-text {
+      font-size: var(--text-sm);
+      color: var(--color-text-2);
+      font-variant-numeric: tabular-nums;
+    }
+    .gp__chips {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 24px 0;
+      align-content: flex-start;
+    }
+    .gp__actions {
+      padding: 16px 0 32px;
+    }
+    .gp__error {
+      color: var(--color-error);
+      font-size: var(--text-sm);
+      text-align: center;
+      margin-bottom: 8px;
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <main class="screen" data-direction="forward">
+    <div class="gp">
+      <div class="gp__header">
+        <div class="gp__back" data-nav="back"><i class="ph ph-arrow-left" style="font-size:22px;"></i></div>
+        <h1 class="gp__title">What do you love?</h1>
+        <p class="gp__sub">Pick at least 3 genres. We'll personalize your feed.</p>
+      </div>
+
+      <div class="gp__progress">
+        <div class="gp__progress-bar"><div class="gp__progress-fill" id="prog" style="width:0%"></div></div>
+        <div class="gp__progress-text"><span id="count">0</span> / 3</div>
+      </div>
+
+      <div class="gp__chips" id="chips"></div>
+
+      <div class="gp__error" id="err"></div>
+      <div class="gp__actions">
+        <button class="btn btn--primary btn--lg btn--block" id="continue" disabled style="opacity:0.5;">Continue</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script>
+    const chipsEl = document.getElementById('chips');
+    const continueBtn = document.getElementById('continue');
+    const errEl = document.getElementById('err');
+    const progEl = document.getElementById('prog');
+    const countEl = document.getElementById('count');
+    const selected = new Set(vidashort.Storage.getGenres());
+
+    function render() {
+      chipsEl.innerHTML = vidashort.MockData.genres.map(g => `
+        <button class="chip chip--lg ${selected.has(g) ? 'chip--selected' : ''}" data-genre="${g}">${g}</button>
+      `).join('');
+      chipsEl.querySelectorAll('.chip').forEach(c => {
+        c.addEventListener('click', () => {
+          const g = c.dataset.genre;
+          if (selected.has(g)) selected.delete(g); else selected.add(g);
+          render();
+        });
+      });
+      const n = selected.size;
+      countEl.textContent = n;
+      progEl.style.width = Math.min(100, (n / 3) * 100) + '%';
+      continueBtn.disabled = n < 3;
+      continueBtn.style.opacity = n < 3 ? '0.5' : '1';
+      errEl.textContent = n === 0 ? '' : (n < 3 ? `Pick ${3 - n} more` : '');
+    }
+
+    continueBtn.addEventListener('click', () => {
+      if (selected.size < 3) return;
+      vidashort.Storage.setGenres([...selected]);
+      vidashort.Haptics.success();
+      vidashort.Router.go('./03-role-picker.html');
+    });
+
+    document.querySelector('[data-nav="back"]').addEventListener('click', () => vidashort.Router.back());
+    render();
+  </script>
+</body>
+</html>

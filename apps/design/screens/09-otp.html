@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Verify code</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .otp { height: 100%; display: flex; flex-direction: column; padding: 0 24px; }
+    .otp__top { padding: 56px 0 24px; }
+    .otp__back { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: var(--color-text-1); cursor: pointer; margin-bottom: 16px; }
+    .otp__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-2xl); margin-bottom: 8px; }
+    .otp__sub { color: var(--color-text-2); font-size: var(--text-sm); line-height: 1.5; }
+    .otp__boxes { display: flex; gap: 8px; justify-content: center; padding: 32px 0; }
+    .otp__box {
+      width: 44px; height: 56px;
+      text-align: center;
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      font-family: var(--font-body);
+      background: var(--color-bg-elev-1);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text-1);
+      caret-color: var(--color-accent-1);
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+    .otp__box:focus { outline: none; border-color: var(--color-accent-1); box-shadow: 0 0 0 3px rgba(255, 31, 90, 0.15); }
+    .otp__box--filled { border-color: var(--color-accent-1); }
+    .otp__resend { text-align: center; padding: 16px 0; color: var(--color-text-2); font-size: var(--text-sm); }
+    .otp__resend a { color: var(--color-accent-3); font-weight: 600; cursor: pointer; }
+    .otp__resend-count { color: var(--color-text-3); }
+    .otp__actions { padding: 8px 0 32px; }
+    .otp__auto { display: flex; align-items: center; gap: 8px; font-size: var(--text-xs); color: var(--color-text-3); margin-top: 12px; justify-content: center; }
+  </style>
+</head>
+<body>
+  <main class="screen" data-direction="forward">
+    <div class="otp">
+      <div class="otp__top">
+        <div class="otp__back" data-nav="back"><i class="ph ph-arrow-left" style="font-size:22px;"></i></div>
+        <h1 class="otp__title">Enter verification code</h1>
+        <p class="otp__sub">We sent a 6-digit code to your email. Enter it below to continue.</p>
+      </div>
+
+      <div class="otp__boxes" id="boxes">
+        <input class="otp__box" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-i="0">
+        <input class="otp__box" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-i="1">
+        <input class="otp__box" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-i="2">
+        <input class="otp__box" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-i="3">
+        <input class="otp__box" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-i="4">
+        <input class="otp__box" maxlength="1" inputmode="numeric" pattern="[0-9]*" data-i="5">
+      </div>
+
+      <div class="otp__resend" id="resend">
+        Didn't get a code? <span class="otp__resend-count" id="count">Resend in 30s</span>
+      </div>
+
+      <div class="otp__actions">
+        <button class="btn btn--primary btn--lg btn--block" id="verify" disabled style="opacity:0.5;">Verify</button>
+        <div class="otp__auto">For the prototype, any 6 digits will work.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script>
+    const inputs = document.querySelectorAll('.otp__box');
+    const verify = document.getElementById('verify');
+    const countEl = document.getElementById('count');
+
+    inputs[0].focus();
+
+    inputs.forEach((box, i) => {
+      box.addEventListener('input', (e) => {
+        const v = e.target.value.replace(/\D/g, '');
+        e.target.value = v.slice(-1);
+        if (v && i < inputs.length - 1) inputs[i + 1].focus();
+        update();
+      });
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && i > 0) {
+          inputs[i - 1].focus();
+        }
+      });
+      box.addEventListener('paste', (e) => {
+        const data = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+        if (data.length === 6) {
+          data.split('').forEach((d, j) => inputs[j].value = d);
+          update();
+          e.preventDefault();
+        }
+      });
+    });
+
+    function update() {
+      const filled = [...inputs].every(b => b.value.length === 1);
+      verify.disabled = !filled;
+      verify.style.opacity = filled ? '1' : '0.5';
+      inputs.forEach(b => b.classList.toggle('otp__box--filled', b.value.length === 1));
+    }
+
+    verify.addEventListener('click', () => {
+      if (verify.disabled) return;
+      verify.setAttribute('aria-busy', 'true');
+      setTimeout(() => {
+        vidashort.Storage.setAuth({ provider: 'email', name: 'Maya', email: 'maya@example.com' });
+        vidashort.Storage.addCoins(50, 'verified_email');
+        vidashort.Haptics.success();
+        vidashort.Toast.show('Verified! 50 coins added.', 'success');
+        vidashort.Confetti.burst({ originX: 50, originY: 50 });
+        setTimeout(() => vidashort.Router.go('./10-home.html'), 600);
+      }, 700);
+    });
+
+    // Resend countdown
+    let t = 30;
+    const interval = setInterval(() => {
+      t--;
+      if (t <= 0) {
+        clearInterval(interval);
+        countEl.innerHTML = '<a>Resend code</a>';
+        countEl.onclick = () => {
+          vidashort.Toast.show('Code resent', 'info');
+          t = 30; countEl.textContent = `Resend in ${t}s`;
+          // restart countdown
+          const i2 = setInterval(() => {
+            t--;
+            if (t <= 0) { clearInterval(i2); countEl.innerHTML = '<a>Resend code</a>'; countEl.onclick = arguments.callee; }
+            else countEl.textContent = `Resend in ${t}s`;
+          }, 1000);
+        };
+      } else {
+        countEl.textContent = `Resend in ${t}s`;
+      }
+    }, 1000);
+
+    document.querySelector('[data-nav="back"]').addEventListener('click', () => vidashort.Router.back());
+  </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Discover</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .dc { padding: 0 20px; }
+    .dc__chips { display: flex; gap: 8px; overflow-x: auto; padding: 12px 0; scrollbar-width: none; }
+    .dc__chips::-webkit-scrollbar { display: none; }
+    .dc__chips .chip { flex-shrink: 0; }
+    .dc__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .dc__card { position: relative; aspect-ratio: 9/16; border-radius: var(--radius-md); overflow: hidden; background-size: cover; background-position: center; cursor: pointer; }
+    .dc__card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.9) 100%); }
+    .dc__card-rating { position: absolute; top: 8px; right: 8px; z-index: 1; background: rgba(0,0,0,0.6); color: var(--color-gold-1); font-size: 11px; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
+    .dc__card-cat { position: absolute; top: 8px; left: 8px; z-index: 1; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 6px; background: var(--gradient-accent); border-radius: 4px; color: white; }
+    .dc__card-title { position: absolute; bottom: 8px; left: 8px; right: 8px; z-index: 1; font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 14px; color: white; line-height: 1.2; }
+    .dc__card-meta { position: absolute; bottom: 36px; left: 8px; right: 8px; z-index: 1; font-size: 10px; color: rgba(255,255,255,0.7); display: flex; gap: 6px; }
+    .dc__section-title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-lg); margin: 16px 0 8px; }
+    .dc__hero { aspect-ratio: 9/16; max-height: 360px; border-radius: var(--radius-lg); overflow: hidden; position: relative; background-size: cover; background-position: center; margin: 12px 0; }
+    .dc__hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.9) 100%); }
+    .dc__hero-body { position: absolute; bottom: 16px; left: 16px; right: 16px; z-index: 1; }
+    .dc__hero-cat { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; background: var(--gradient-accent); border-radius: 4px; color: white; margin-bottom: 6px; }
+    .dc__hero-title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: 22px; color: white; line-height: 1.1; margin-bottom: 6px; }
+    .dc__hero-syn { font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.4; margin-bottom: 12px; max-width: 90%; }
+    .dc__hero-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--gradient-accent); color: white; font-weight: 800; font-size: 12px; border-radius: 999px; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Discover"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="dc">
+      <div class="dc__chips" id="chips">
+        <button class="chip chip--selected" data-cat="all">All</button>
+        <button class="chip" data-cat="Romance">Romance</button>
+        <button class="chip" data-cat="CEO">CEO</button>
+        <button class="chip" data-cat="Werewolf">Werewolf</button>
+        <button class="chip" data-cat="Rebirth">Rebirth</button>
+        <button class="chip" data-cat="Billionaire">Billionaire</button>
+        <button class="chip" data-cat="Mafia">Mafia</button>
+      </div>
+
+      <div id="heroSlot"></div>
+
+      <div class="dc__section-title">Trending now</div>
+      <div class="dc__grid" id="grid"></div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    let active = 'all';
+    function render() {
+      const list = vidashort.MockData.allSeries.filter(s => active === 'all' || s.category === active);
+      // Hero: first hot + not the same as the trending rows below
+      const hot = list.find(s => s.hot) || list[0];
+      document.getElementById('heroSlot').innerHTML = hot ? `
+        <a class="dc__hero" href="./13-series-detail.html?slug=${hot.slug}" style="background-image:url('${hot.backdrop || hot.cover}');">
+          <div class="dc__hero-body">
+            <span class="dc__hero-cat">${hot.category}</span>
+            <div class="dc__hero-title">${hot.title}</div>
+            <div class="dc__hero-syn">${hot.synopsis}</div>
+            <span class="dc__hero-btn"><i class="ph-fill ph-play"></i> Start watching</span>
+          </div>
+        </a>
+      ` : '';
+
+      const rest = list.filter(s => s.id !== hot.id);
+      document.getElementById('grid').innerHTML = rest.map(s => `
+        <a class="dc__card" href="./13-series-detail.html?slug=${s.slug}" style="background-image:url('${s.cover}');">
+          <span class="dc__card-cat">${s.category}</span>
+          ${s.rating ? `<span class="dc__card-rating">★ ${s.rating}</span>` : ''}
+          <div class="dc__card-meta">${s.totalEpisodes} ep</div>
+          <div class="dc__card-title">${s.title}</div>
+        </a>
+      `).join('');
+    }
+    render();
+    document.getElementById('chips').addEventListener('click', e => {
+      const c = e.target.closest('.chip');
+      if (!c) return;
+      document.querySelectorAll('#chips .chip').forEach(x => x.classList.toggle('chip--selected', x === c));
+      active = c.dataset.cat;
+      render();
+    });
+  </script>
+</body>
+</html>

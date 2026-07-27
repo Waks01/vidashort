@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  logo-c-stacked.svg — STOPGAP / reference variant for brand showcase.
+  Brand spec: docs/brand/00-overview.md § 9 calls this out as "Reference ·
+  Stacked Coin" — DM Serif Display + gold-coin "o".
+  Shown at 0.5 opacity in apps/design/index.html brand showcase panel.
+  Real implementation should come from Figma.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 180" width="480" height="180">
+  <defs>
+    <style type="text/css">
+      @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;display=swap');
+      .wm { font-family: 'DM Serif Display', Georgia, serif; fill: #f5e9d4; }
+    </style>
+    <radialGradient id="coin" cx="35%" cy="30%" r="60%">
+      <stop offset="0%"  stop-color="#ffe27a"/>
+      <stop offset="60%" stop-color="#d4a017"/>
+      <stop offset="100%" stop-color="#8b6914"/>
+    </radialGradient>
+  </defs>
+  <text x="20" y="130" class="wm" font-size="140">vidas</text>
+  <circle cx="245" cy="100" r="14" fill="url(#coin)"/>
+  <text x="262" y="130" class="wm" font-size="140">rt</text>
+</svg>

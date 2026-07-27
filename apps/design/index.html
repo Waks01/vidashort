@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>vidashort · prototype index</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/icons/app-icon-i-playv.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./styles/tokens.css">
+  <link rel="stylesheet" href="./styles/base.css">
+  <link rel="stylesheet" href="./styles/components.css">
+  <style>
+    body { overflow: auto; height: auto; }
+    .screen { width: 100%; max-width: 1100px; height: auto; min-height: 100vh; padding: 48px 24px 80px; }
+    .index-hero { text-align: center; margin-bottom: 56px; }
+    .index-hero img { width: 280px; max-width: 80%; margin: 0 auto 24px; }
+    .index-hero h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: var(--text-4xl); margin-bottom: 8px; }
+    .index-hero p { color: var(--color-text-2); font-size: var(--text-base); max-width: 480px; margin: 0 auto; }
+    .index-section { margin-bottom: 48px; }
+    .index-section h2 { font-family: var(--font-body); font-weight: 800; font-size: var(--text-xs); letter-spacing: var(--tracking-widest); text-transform: uppercase; color: var(--color-text-3); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--color-border); }
+    .index-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .index-card { display: block; padding: 16px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); transition: all var(--duration-fast) var(--ease-out); }
+    .index-card:hover { transform: translateY(-2px); border-color: var(--color-accent-1); box-shadow: var(--shadow-card); }
+    .index-card__num { font-family: var(--font-mono); font-size: 10px; color: var(--color-text-3); letter-spacing: var(--tracking-wide); }
+    .index-card__title { font-family: var(--font-body); font-weight: 700; font-size: var(--text-base); color: var(--color-text-1); margin-top: 4px; }
+    .index-card__desc { font-size: 12px; color: var(--color-text-2); margin-top: 4px; }
+    .index-card--marquee { border-color: var(--color-accent-1); background: linear-gradient(135deg, var(--color-bg-elev-2), var(--color-bg-elev-1)); position: relative; overflow: hidden; }
+    .index-card--marquee::after { content: '★ MARQUEE'; position: absolute; top: 8px; right: 8px; font-size: 9px; font-weight: 800; color: var(--color-accent-3); letter-spacing: var(--tracking-widest); }
+    .index-tools { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+    .index-tools .btn { height: 40px; padding: 0 18px; font-size: 12px; }
+    .index-brand { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 56px; }
+    .index-brand__item { padding: 24px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-align: center; }
+    .index-brand__item h3 { font-family: var(--font-body); font-weight: 800; font-size: var(--text-xs); letter-spacing: var(--tracking-widest); text-transform: uppercase; color: var(--color-text-3); margin-bottom: 16px; }
+    .index-brand__item img { max-width: 100%; height: 80px; margin: 0 auto 8px; }
+    .index-brand__item p { font-size: 11px; color: var(--color-text-3); }
+    .index-icon { width: 200px; aspect-ratio: 1; margin: 0 auto 8px; border-radius: 44px; }
+    .index-foot { text-align: center; color: var(--color-text-3); font-size: 12px; margin-top: 48px; }
+  </style>
+</head>
+<body>
+  <main class="screen">
+    <div class="index-hero">
+      <img src="./assets/icons/splash-logo.svg" alt="vidashort">
+      <h1>vidashort prototype</h1>
+      <p>A clickable HTML/CSS/JS prototype of the ReelShort-style microdrama app. Every screen, every state, fully interactive.</p>
+    </div>
+
+    <div class="index-tools">
+      <a class="btn btn--primary" href="./screens/00-splash.html">▶ Start user flow</a>
+      <a class="btn btn--secondary" href="./screens/10-home.html">Skip to home</a>
+      <button class="btn btn--gold" id="creatorMode">Enter Creator Studio</button>
+      <button class="btn btn--secondary" id="adminMode">Enter Admin</button>
+      <button class="btn btn--ghost" id="reset">Reset prototype state</button>
+    </div>
+
+    <div class="index-section">
+      <h2>Brand direction (locked: 3D V-forward with gradient glow)</h2>
+      <div class="index-brand">
+        <div class="index-brand__item" style="border-color: var(--color-accent-1); background: linear-gradient(135deg, var(--color-bg-elev-2), var(--color-bg-elev-1));">
+          <h3 style="color: var(--color-accent-3);">★ Selected · 3D V-Forward</h3>
+          <img src="./assets/icons/logo-3d-v.svg" alt="logo 3D V">
+          <p>3D V glyph in magenta→crimson gradient with gold rim light and magenta halo. "idashort" in Playfair Display italic. Most distinctive, most "addictive" looking.</p>
+        </div>
+        <div class="index-brand__item" style="opacity: 0.5;">
+          <h3>Reference · Theatrical Serif</h3>
+          <img src="./assets/icons/logo-a-theatrical.svg" alt="logo A">
+          <p>Playfair Display 900 italic + gold-coin "i". Old-Hollywood drama.</p>
+        </div>
+        <div class="index-brand__item" style="opacity: 0.5;">
+          <h3>Reference · Stacked Coin</h3>
+          <img src="./assets/icons/logo-c-stacked.svg" alt="logo C">
+          <p>DM Serif Display + gold-coin "o". Premium / luxury.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="index-section">
+      <h2>App icon (locked: 3D Play-V with halo)</h2>
+      <div class="index-brand">
+        <div class="index-brand__item" style="border-color: var(--color-accent-1); background: linear-gradient(135deg, var(--color-bg-elev-2), var(--color-bg-elev-1));">
+          <h3 style="color: var(--color-accent-3);">★ Selected · 3D Play-V</h3>
+          <img class="index-icon" src="./assets/icons/app-icon.svg" alt="app icon">
+          <p>Magenta→crimson 3D V with right arm extending into a play triangle. Gold rim light. Magenta halo behind the V.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="index-section">
+      <h2>Pre-auth flow</h2>
+      <div class="index-grid">
+        <a class="index-card" href="./screens/00-splash.html"><div class="index-card__num">00</div><div class="index-card__title">Splash</div><div class="index-card__desc">Wordmark + tagline, 1.5s auto-advance</div></a>
+        <a class="index-card" href="./screens/01-onboarding.html"><div class="index-card__num">01</div><div class="index-card__title">Onboarding</div><div class="index-card__desc">3 swipeable slides with skip</div></a>
+        <a class="index-card" href="./screens/02-genre-picker.html"><div class="index-card__num">02</div><div class="index-card__title">Genre picker</div><div class="index-card__desc">12 chips, "Continue" enables at 3+</div></a>
+        <a class="index-card" href="./screens/03-role-picker.html"><div class="index-card__num">03</div><div class="index-card__title">Role picker</div><div class="index-card__desc">Viewer or Creator signup</div></a>
+        <a class="index-card" href="./screens/04-age-gate.html"><div class="index-card__num">04</div><div class="index-card__title">Age gate</div><div class="index-card__desc">17+ confirmation</div></a>
+        <a class="index-card" href="./screens/05-auth-entry.html"><div class="index-card__num">05</div><div class="index-card__title">Auth entry</div><div class="index-card__desc">Apple / Google / Email</div></a>
+        <a class="index-card" href="./screens/05a-creator-signup.html"><div class="index-card__num">05a</div><div class="index-card__title">Creator signup</div><div class="index-card__desc">Channel + payout setup</div></a>
+        <a class="index-card" href="./screens/06-sign-up.html"><div class="index-card__num">06</div><div class="index-card__title">Sign up</div><div class="index-card__desc">Email + password + terms</div></a>
+        <a class="index-card" href="./screens/07-sign-in.html"><div class="index-card__num">07</div><div class="index-card__title">Sign in</div><div class="index-card__desc">Returning user</div></a>
+        <a class="index-card" href="./screens/08-forgot-password.html"><div class="index-card__num">08</div><div class="index-card__title">Forgot password</div><div class="index-card__desc">Email + confirmation</div></a>
+        <a class="index-card" href="./screens/09-otp.html"><div class="index-card__num">09</div><div class="index-card__title">OTP</div><div class="index-card__desc">6-digit code, resend countdown</div></a>
+      </div>
+    </div>
+
+    <div class="index-section">
+      <h2>Main app · Discovery</h2>
+      <div class="index-grid">
+        <a class="index-card index-card--marquee" href="./screens/10-home.html"><div class="index-card__num">10 · MARQUEE 1</div><div class="index-card__title">Home / Feed</div><div class="index-card__desc">Vertical scroll-snap, gestures, ad injections</div></a>
+        <a class="index-card" href="./screens/11-discover.html"><div class="index-card__num">11</div><div class="index-card__title">Discover</div><div class="index-card__desc">Series grid + filter chips</div></a>
+        <a class="index-card" href="./screens/12-search.html"><div class="index-card__num">12</div><div class="index-card__title">Search</div><div class="index-card__desc">Trending + recent + results</div></a>
+        <a class="index-card" href="./screens/13-series-detail.html"><div class="index-card__num">13</div><div class="index-card__title">Series detail</div><div class="index-card__desc">Cover, synopsis, episode list with locks</div></a>
+        <a class="index-card index-card--marquee" href="./screens/14-episode-player.html"><div class="index-card__num">14 · MARQUEE 2</div><div class="index-card__title">Episode player</div><div class="index-card__desc">Full-bleed 9:16, fake video, gestures, paywall trigger</div></a>
+        <a class="index-card" href="./screens/15-comments.html"><div class="index-card__num">15</div><div class="index-card__title">Comments</div><div class="index-card__desc">Bottom sheet</div></a>
+        <a class="index-card" href="./screens/16-share-sheet.html"><div class="index-card__num">16</div><div class="index-card__title">Share sheet</div><div class="index-card__desc">Bottom sheet</div></a>
+      </div>
+    </div>
+
+    <div class="index-section">
+      <h2>Main app · Money & engagement</h2>
+      <div class="index-grid">
+        <a class="index-card" href="./screens/20-library.html"><div class="index-card__num">20</div><div class="index-card__title">Library</div><div class="index-card__desc">4 tabs, empty states</div></a>
+        <a class="index-card" href="./screens/21-wallet.html"><div class="index-card__num">21</div><div class="index-card__title">Wallet</div><div class="index-card__desc">Balance, daily check-in, transactions</div></a>
+        <a class="index-card" href="./screens/22-coin-store.html"><div class="index-card__num">22</div><div class="index-card__title">Coin store</div><div class="index-card__desc">5 packs, best-value badge</div></a>
+        <a class="index-card" href="./screens/23-vip.html"><div class="index-card__num">23</div><div class="index-card__title">VIP</div><div class="index-card__desc">Monthly/Yearly, comparison table</div></a>
+        <a class="index-card" href="./screens/24-daily-reward.html"><div class="index-card__num">24</div><div class="index-card__title">Daily reward</div><div class="index-card__desc">7-day streak, claim animation</div></a>
+        <a class="index-card index-card--marquee" href="./screens/25-paywall.html"><div class="index-card__num">25 · MARQUEE 3</div><div class="index-card__title">Paywall</div><div class="index-card__desc">3 CTAs, dismissable, urgency banner</div></a>
+        <a class="index-card" href="./screens/26-rewarded-ad.html"><div class="index-card__num">26</div><div class="index-card__title">Rewarded ad</div><div class="index-card__desc">3 states, +10 coins</div></a>
+        <a class="index-card" href="./screens/27-interstitial-ad.html"><div class="index-card__num">27</div><div class="index-card__title">Interstitial ad</div><div class="index-card__desc">5s countdown, sponsored drama</div></a>
+      </div>
+    </div>
+
+    <div class="index-section">
+      <h2>Main app · System</h2>
+      <div class="index-grid">
+        <a class="index-card" href="./screens/30-profile.html"><div class="index-card__num">30</div><div class="index-card__title">Profile</div><div class="index-card__desc">Avatar, balance, stats, menu</div></a>
+        <a class="index-card" href="./screens/31-settings.html"><div class="index-card__num">31</div><div class="index-card__title">Settings</div><div class="index-card__desc">Account, privacy, sign out</div></a>
+        <a class="index-card" href="./screens/32-notifications.html"><div class="index-card__num">32</div><div class="index-card__title">Notifications</div><div class="index-card__desc">Push notification list</div></a>
+      </div>
+    </div>
+
+    <div class="index-section">
+      <h2>States</h2>
+      <div class="index-grid">
+        <a class="index-card" href="./screens/40-empty-state.html"><div class="index-card__num">40</div><div class="index-card__title">Empty states</div><div class="index-card__desc">3 examples</div></a>
+        <a class="index-card" href="./screens/41-error-state.html"><div class="index-card__num">41</div><div class="index-card__title">Error states</div><div class="index-card__desc">3 examples</div></a>
+        <a class="index-card" href="./screens/42-loading-state.html"><div class="index-card__num">42</div><div class="index-card__title">Loading states</div><div class="index-card__desc">3 skeletons</div></a>
+      </div>
+    </div>
+
+    <div class="index-section">
+      <h2>Creator studio</h2>
+      <div class="index-grid">
+        <a class="index-card" href="./screens/50-creator-dashboard.html"><div class="index-card__num">50</div><div class="index-card__title">Dashboard</div><div class="index-card__desc">Earnings, KPIs, quick actions</div></a>
+        <a class="index-card" href="./screens/51-creator-series.html"><div class="index-card__num">51</div><div class="index-card__title">My series</div><div class="index-card__desc">All uploads + status</div></a>
+        <a class="index-card" href="./screens/52-creator-upload.html"><div class="index-card__num">52</div><div class="index-card__title">Upload series</div><div class="index-card__desc">Metadata + episodes + poster</div></a>
+        <a class="index-card" href="./screens/53-creator-analytics.html"><div class="index-card__num">53</div><div class="index-card__title">Analytics</div><div class="index-card__desc">Views, unlocks, daily chart</div></a>
+        <a class="index-card" href="./screens/54-creator-payouts.html"><div class="index-card__num">54</div><div class="index-card__title">Payouts</div><div class="index-card__desc">Cash out to OPay / PalmPay</div></a>
+      </div>
+    </div>
+
+    <div class="index-section">
+      <h2>Admin</h2>
+      <div class="index-grid">
+        <a class="index-card" href="./screens/60-admin-overview.html"><div class="index-card__num">60</div><div class="index-card__title">Overview</div><div class="index-card__desc">DAU, GMV, revenue, KPIs</div></a>
+        <a class="index-card" href="./screens/61-admin-moderation.html"><div class="index-card__num">61</div><div class="index-card__title">Moderation</div><div class="index-card__desc">Series + comments + accounts</div></a>
+        <a class="index-card" href="./screens/62-admin-content.html"><div class="index-card__num">62</div><div class="index-card__title">Content</div><div class="index-card__desc">All series, edit / hide / delete</div></a>
+        <a class="index-card" href="./screens/63-admin-users.html"><div class="index-card__num">63</div><div class="index-card__title">Users</div><div class="index-card__desc">Search, filter, manage</div></a>
+        <a class="index-card" href="./screens/64-admin-ads.html"><div class="index-card__num">64</div><div class="index-card__title">Ads & monetization</div><div class="index-card__desc">Campaigns, fill rate, cap hits</div></a>
+        <a class="index-card" href="./screens/65-admin-finance.html"><div class="index-card__num">65</div><div class="index-card__title">Finance & payouts</div><div class="index-card__desc">Net revenue, ledger, approve payouts</div></a>
+      </div>
+    </div>
+
+    <div class="index-section" style="background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 20px; margin-top: 32px;">
+      <h2 style="border:none; padding:0; margin-bottom: 12px;">Economics (locked)</h2>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; font-size: 12px;">
+        <div><strong style="color:var(--color-gold-1); font-size: 18px; font-weight: 800;">10c = ₦1</strong><br><span style="color:var(--color-text-3);">coin ↔ naira</span></div>
+        <div><strong style="color:var(--color-gold-1); font-size: 18px; font-weight: 800;">25 coins</strong><br><span style="color:var(--color-text-3);">per episode unlock (₦2.50)</span></div>
+        <div><strong style="color:var(--color-gold-1); font-size: 18px; font-weight: 800;">20 coins</strong><br><span style="color:var(--color-text-3);">per rewarded ad (₦2.00)</span></div>
+        <div><strong style="color:var(--color-gold-1); font-size: 18px; font-weight: 800;">100 / day</strong><br><span style="color:var(--color-text-3);">user ad cap</span></div>
+        <div><strong style="color:var(--color-gold-1); font-size: 18px; font-weight: 800;">60 / 40 %</strong><br><span style="color:var(--color-text-3);">creator / platform</span></div>
+        <div><strong style="color:var(--color-gold-1); font-size: 18px; font-weight: 800;">₦5,000</strong><br><span style="color:var(--color-text-3);">min payout (50,000 coins)</span></div>
+      </div>
+      <div style="margin-top: 14px; font-size: 12px; color: var(--color-text-2); line-height: 1.5;">
+        <strong>Source policy:</strong> Originals use TMDB metadata (posters, episode stills). Creator uploads use a placeholder poster per title. Replace <code style="background: var(--color-bg-elev-2); padding: 1px 6px; border-radius: 4px;">TMDB.poster()</code> in <code>scripts/data.js</code> with real API calls when keys are wired.
+      </div>
+    </div>
+
+    <div class="index-foot">
+      vidashort prototype v0.1 · Click any screen to open it · <a href="#" id="reset2" style="color:var(--color-accent-3);text-decoration:underline">Reset all state</a>
+    </div>
+  </main>
+
+  <script src="./scripts/data.js"></script>
+  <script src="./scripts/app.js"></script>
+  <script>
+    document.getElementById('reset').addEventListener('click', () => {
+      if (confirm('Clear all prototype state and reload?')) {
+        vidashort.Storage.clear();
+        location.reload();
+      }
+    });
+    document.getElementById('reset2').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm('Clear all prototype state and reload?')) {
+        vidashort.Storage.clear();
+        location.reload();
+      }
+    });
+    document.getElementById('creatorMode').addEventListener('click', () => {
+      vidashort.Storage.setRole('creator');
+      // Pre-fill a creator profile for demo
+      if (!vidashort.Storage.getCreatorProfile()) {
+        vidashort.Storage.setCreatorProfile(vidashort.MockData.creators[0]);
+        vidashort.Storage.setCreatorSeries(vidashort.MockData.creatorSeries);
+        vidashort.Storage.setCreatorEarnings({ lifetimeCoins: 184500, pendingCoins: 184500, lifetimeNaira: 18450, pendingNaira: 18450 });
+      }
+      location.href = './screens/50-creator-dashboard.html';
+    });
+    document.getElementById('adminMode').addEventListener('click', () => {
+      vidashort.Storage.setRole('admin');
+      vidashort.Storage.set('user.isAdmin', true);
+      location.href = './screens/60-admin-overview.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Upload series</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 32px; }
+    .up { padding: 0 20px; }
+    .up__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-xl); padding: 16px 0 4px; }
+    .up__sub { color: var(--color-text-2); font-size: var(--text-sm); margin-bottom: 20px; }
+    .up__section { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; }
+    .up__section-title { font-weight: 700; font-size: var(--text-sm); color: var(--color-text-1); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .up__section-title i { color: var(--color-gold-1); }
+    .up__drop {
+      border: 2px dashed var(--color-border-strong);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      color: var(--color-text-2);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+    }
+    .up__drop:hover { border-color: var(--color-gold-1); color: var(--color-gold-1); }
+    .up__drop i { font-size: 32px; display: block; margin-bottom: 8px; }
+    .up__row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .up__form { display: flex; flex-direction: column; gap: 12px; }
+    .up__eps { display: flex; flex-direction: column; gap: 8px; }
+    .up__ep { display: flex; gap: 8px; align-items: center; background: var(--color-bg-elev-2); border-radius: var(--radius-sm); padding: 8px 12px; }
+    .up__ep-num { width: 24px; height: 24px; border-radius: 50%; background: var(--gradient-accent); color: white; display: grid; place-items: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+    .up__ep-input { flex: 1; background: transparent; border: none; color: var(--color-text-1); font-size: var(--text-sm); outline: none; }
+    .up__ep-input::placeholder { color: var(--color-text-3); }
+    .up__ep-dur { font-size: 11px; color: var(--color-text-3); width: 56px; text-align: right; font-variant-numeric: tabular-nums; }
+    .up__ep-del { color: var(--color-text-3); cursor: pointer; }
+    .up__ep-del:hover { color: var(--color-error); }
+    .up__add { width: 100%; padding: 10px; border: 1.5px dashed var(--color-border-strong); border-radius: var(--radius-sm); color: var(--color-text-2); background: transparent; cursor: pointer; font-size: var(--text-sm); font-weight: 600; }
+    .up__add:hover { color: var(--color-gold-1); border-color: var(--color-gold-1); }
+    .up__submit { padding: 16px 0 32px; }
+    .up__terms { font-size: 11px; color: var(--color-text-3); text-align: center; line-height: 1.5; padding-top: 8px; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Upload series" data-back="true"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="up">
+      <div class="up__title">New series</div>
+      <div class="up__sub">Add your metadata, then upload episodes. We'll review within 24 hours.</div>
+
+      <div class="up__section">
+        <div class="up__section-title"><i class="ph-bold ph-image"></i> Poster / thumbnail</div>
+        <div class="up__drop" id="poster">
+          <i class="ph-duotone ph-image-square"></i>
+          <div style="font-weight:600; color:var(--color-text-1); margin-bottom:4px;">Drop poster here</div>
+          <div style="font-size:11px;">540 × 960 (9:16) • JPG/PNG • Max 5MB</div>
+        </div>
+      </div>
+
+      <form class="up__form" id="form">
+        <div class="up__section">
+          <div class="up__section-title"><i class="ph-bold ph-info"></i> Series details</div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <label class="label" for="title">Title</label>
+              <input class="input" id="title" placeholder="e.g. Married to the Mafia Don" required>
+            </div>
+            <div>
+              <label class="label" for="synopsis">Synopsis</label>
+              <textarea class="input" id="synopsis" rows="3" placeholder="Hook the viewer in 2 lines." required style="resize:vertical; min-height:80px;"></textarea>
+            </div>
+            <div class="up__row2">
+              <div>
+                <label class="label" for="cat">Category</label>
+                <select class="input" id="cat" required>
+                  <option>Romance</option><option>CEO</option><option>Werewolf</option><option>Rebirth</option>
+                  <option>Revenge</option><option>Fantasy</option><option>Historical</option><option>Mafia</option>
+                </select>
+              </div>
+              <div>
+                <label class="label" for="lang">Language</label>
+                <select class="input" id="lang">
+                  <option>English</option><option>Yoruba</option><option>Hausa</option><option>Igbo</option><option>Pidgin</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="label" for="tags">Tags (comma-separated)</label>
+              <input class="input" id="tags" placeholder="CEO, Romance, Workplace">
+            </div>
+          </div>
+        </div>
+
+        <div class="up__section">
+          <div class="up__section-title"><i class="ph-bold ph-list-numbers"></i> Episodes</div>
+          <div class="up__eps" id="eps"></div>
+          <button type="button" class="up__add" id="addEp"><i class="ph ph-plus"></i> Add episode</button>
+        </div>
+
+        <label class="checkbox">
+          <input type="checkbox" id="rights" required>
+          <span class="checkbox__box"></span>
+          <span class="checkbox__label">I own the rights to all content. I understand false claims result in account termination.</span>
+        </label>
+      </form>
+
+      <div class="up__submit">
+        <button class="btn btn--gold btn--lg btn--block" id="submit">Submit for review</button>
+        <div class="up__terms">Series go live after our team reviews them, usually within 24 hours.</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    if (!vidashort.Auth.requireRole('creator')) {}
+
+    const eps = [{ title: '', dur: 75 }, { title: '', dur: 78 }, { title: '', dur: 80 }];
+    const epsEl = document.getElementById('eps');
+
+    function renderEps() {
+      epsEl.innerHTML = eps.map((e, i) => `
+        <div class="up__ep">
+          <div class="up__ep-num">${i + 1}</div>
+          <input class="up__ep-input" data-i="${i}" data-f="title" value="${e.title}" placeholder="Episode ${i + 1} title">
+          <input class="up__ep-input" data-i="${i}" data-f="dur" value="${e.dur}" type="number" min="30" max="180" style="width:56px; text-align:right;">
+          <span class="up__ep-dur">sec</span>
+          <i class="ph ph-trash up__ep-del" data-i="${i}"></i>
+        </div>
+      `).join('');
+      epsEl.querySelectorAll('.up__ep-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+          eps[+inp.dataset.i][inp.dataset.f] = inp.dataset.f === 'dur' ? +inp.value : inp.value;
+        });
+      });
+      epsEl.querySelectorAll('.up__ep-del').forEach(btn => {
+        btn.addEventListener('click', () => { eps.splice(+btn.dataset.i, 1); renderEps(); });
+      });
+    }
+    renderEps();
+    document.getElementById('addEp').addEventListener('click', () => { eps.push({ title: '', dur: 80 }); renderEps(); });
+
+    document.getElementById('poster').addEventListener('click', () => {
+      vidashort.Toast.show('Poster picker is mocked in the prototype', 'info');
+    });
+
+    document.getElementById('submit').addEventListener('click', () => {
+      const title = document.getElementById('title').value.trim();
+      const synopsis = document.getElementById('synopsis').value.trim();
+      const cat = document.getElementById('cat').value;
+      if (!title || !synopsis) { vidashort.Toast.show('Title and synopsis are required', 'error'); vidashort.Haptics.error(); return; }
+      if (!document.getElementById('rights').checked) { vidashort.Toast.show('Confirm you own the rights', 'error'); return; }
+      if (!eps.length) { vidashort.Toast.show('Add at least one episode', 'error'); return; }
+      if (eps.some(e => !e.title)) { vidashort.Toast.show('All episodes need a title', 'error'); return; }
+
+      document.getElementById('submit').setAttribute('aria-busy', 'true');
+      setTimeout(() => {
+        const profile = vidashort.Storage.getCreatorProfile();
+        const newSeries = {
+          id: 'cs-mine-' + Date.now(),
+          creatorId: profile.id,
+          slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          title, synopsis,
+          cover: vidashort.MockData.TMDB.poster(title.toLowerCase().replace(/[^a-z0-9]+/g, '-')),
+          category: cat,
+          totalEpisodes: eps.length,
+          isCreator: true,
+          moderationStatus: 'pending',
+          publishedAt: null,
+          views: 0, rating: 0, loyaltyCoins: 0,
+          episodes: eps.map((e, i) => ({
+            number: i + 1, title: e.title, durationS: e.dur, still: vidashort.MockData.TMDB.still(`${title}-e${i+1}`),
+            requiredCoins: vidashort.MockData.ECONOMY.episodeCostCoins, isFree: i < 5, isPaywalled: i >= 5,
+            adPreroll: i >= 5, adMidroll: i >= 5,
+          })),
+        };
+        const list = vidashort.Storage.getCreatorSeries();
+        list.unshift(newSeries);
+        vidashort.Storage.setCreatorSeries(list);
+        vidashort.Haptics.success();
+        vidashort.Toast.show('Submitted for review', 'success');
+        vidashort.Confetti.burst({ originX: 50, originY: 60 });
+        setTimeout(() => vidashort.Router.go('./51-creator-series.html'), 800);
+      }, 900);
+    });
+  </script>
+</body>
+</html>

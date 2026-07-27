@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Daily reward</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .dr { padding: 0 20px; text-align: center; }
+    .dr__head { padding: 12px 0 16px; }
+    .dr__head h1 { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 32px; }
+    .dr__head p { color: var(--color-text-2); font-size: 13px; margin-top: 4px; }
+    .dr__coin { width: 140px; height: 140px; margin: 16px auto; position: relative; }
+    .dr__coin-disc { position: absolute; inset: 0; border-radius: 50%; background: var(--gradient-coin); box-shadow: var(--glow-gold), inset 0 -10px 20px rgba(0,0,0,0.4), inset 0 6px 16px rgba(255,255,255,0.4); display: grid; place-items: center; font-size: 48px; color: #1a0e00; font-weight: 800; transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .dr__coin-disc.is-spin { animation: coin-spin 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes coin-spin { 0% { transform: rotateY(0); } 100% { transform: rotateY(720deg); } }
+    .dr__reward-label { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-gold-1); margin-top: 8px; }
+    .dr__reward-amt { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 36px; color: var(--color-gold-1); margin-top: 4px; }
+    .dr__claim { margin-top: 16px; padding: 14px 32px; background: var(--gradient-gold); color: #1a0e00; border-radius: 999px; font-weight: 800; font-size: 14px; }
+    .dr__claim:disabled { background: var(--color-bg-elev-2); color: var(--color-text-3); cursor: not-allowed; }
+    .dr__countdown { margin-top: 10px; font-size: 12px; color: var(--color-text-3); }
+    .dr__streak { display: flex; gap: 6px; margin: 24px 0 12px; justify-content: center; }
+    .dr__day { flex: 1; aspect-ratio: 1; max-width: 44px; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: 12px; display: grid; place-items: center; font-size: 10px; font-weight: 800; color: var(--color-text-3); }
+    .dr__day--done { background: var(--gradient-gold); color: #1a0e00; border-color: transparent; }
+    .dr__day--today { background: var(--gradient-accent); color: white; border-color: transparent; box-shadow: var(--glow-magenta); }
+    .dr__day--jackpot { background: linear-gradient(135deg, #ff1f5a, #ffe27a); color: white; }
+    .dr__day-amt { font-size: 8px; opacity: 0.85; }
+    .dr__schedule { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; margin-top: 12px; text-align: left; }
+    .dr__schedule-title { font-weight: 800; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-2); margin-bottom: 8px; }
+    .dr__row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; }
+    .dr__row b { color: var(--color-gold-1); }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Daily check-in" data-back="true"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="dr">
+      <div class="dr__head">
+        <h1>Day <span id="dayNum">5</span> of 7</h1>
+        <p>Come back every day to keep your streak.</p>
+      </div>
+
+      <div class="dr__coin">
+        <div class="dr__coin-disc" id="coin">+5</div>
+      </div>
+      <div class="dr__reward-label">Today's reward</div>
+      <div class="dr__reward-amt" id="rewardAmt">+5 coins</div>
+
+      <button class="dr__claim" id="claim">Claim +5 coins</button>
+      <div class="dr__countdown" id="countdown"></div>
+
+      <div class="dr__streak" id="streak"></div>
+
+      <div class="dr__schedule">
+        <div class="dr__schedule-title">7-day reward schedule</div>
+        <div class="dr__row"><span>Day 1</span><b>+5 coins</b></div>
+        <div class="dr__row"><span>Day 2</span><b>+5 coins</b></div>
+        <div class="dr__row"><span>Day 3</span><b>+10 coins</b></div>
+        <div class="dr__row"><span>Day 4</span><b>+10 coins</b></div>
+        <div class="dr__row"><span>Day 5</span><b>+15 coins</b></div>
+        <div class="dr__row"><span>Day 6</span><b>+15 coins</b></div>
+        <div class="dr__row"><span>Day 7</span><b>🎰 +50 coins (JACKPOT)</b></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const SCHEDULE = [5, 5, 10, 10, 15, 15, 50];
+    const KEY = 'vidashort.user.dailyStreak';
+    function load() {
+      try { return JSON.parse(localStorage.getItem(KEY)) || { day: 0, lastClaimedOn: null }; } catch (e) { return { day: 0, lastClaimedOn: null }; }
+    }
+    function save(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
+    const state = load();
+    const today = new Date().toDateString();
+    const canClaim = state.lastClaimedOn !== today;
+    const nextDay = state.day >= 7 ? 1 : state.day + 1;
+    const todayReward = SCHEDULE[nextDay - 1];
+
+    document.getElementById('dayNum').textContent = nextDay;
+    document.getElementById('coin').textContent = '+' + todayReward;
+    document.getElementById('rewardAmt').textContent = `+${todayReward} coins`;
+
+    // Streak row
+    const streak = document.getElementById('streak');
+    streak.innerHTML = SCHEDULE.map((amt, i) => {
+      const done = i < state.day && !canClaim ? true : (i < state.day - 1);
+      const isToday = i === nextDay - 1;
+      const isJackpot = i === 6;
+      let cls = 'dr__day';
+      if (done) cls += ' dr__day--done';
+      else if (isToday) cls += ' dr__day--today';
+      if (isJackpot) cls += ' dr__day--jackpot';
+      return `<div class="${cls}">${i+1}<div class="dr__day-amt">${amt}</div></div>`;
+    }).join('');
+
+    const claim = document.getElementById('claim');
+    const cd = document.getElementById('countdown');
+    if (!canClaim) {
+      claim.disabled = true;
+      claim.textContent = 'Come back tomorrow!';
+      function tick() {
+        const now = new Date();
+        const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+        const ms = tomorrow - now;
+        const h = String(Math.floor(ms / 3600000)).padStart(2, '0');
+        const m = String(Math.floor((ms % 3600000) / 60000)).padStart(2, '0');
+        const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+        cd.textContent = `Next reward in ${h}:${m}:${s}`;
+      }
+      tick(); setInterval(tick, 1000);
+    }
+
+    claim.addEventListener('click', () => {
+      if (claim.disabled) return;
+      vidashort.Haptics.tap();
+      document.getElementById('coin').classList.add('is-spin');
+      setTimeout(() => {
+        vidashort.Storage.setCoins(vidashort.Storage.getCoins() + todayReward);
+        save({ day: nextDay >= 7 ? 7 : nextDay, lastClaimedOn: today });
+        vidashort.Confetti.burst({ count: 50 });
+        vidashort.Toast.show(`+${todayReward} coins claimed!`, 'success');
+        setTimeout(() => location.reload(), 600);
+      }, 800);
+    });
+  </script>
+</body>
+</html>

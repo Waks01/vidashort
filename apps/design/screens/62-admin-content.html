@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Content management</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; }
+    .cn { padding: 0 20px; }
+    .cn__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-xl); padding: 16px 0 8px; }
+    .cn__filter { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 16px; scrollbar-width: none; }
+    .cn__filter::-webkit-scrollbar { display: none; }
+    .cn__search { width: 100%; background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px 14px 10px 36px; color: var(--color-text-1); font-size: var(--text-sm); margin-bottom: 12px; outline: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="%236b5a4d" viewBox="0 0 256 256"><path d="M229.66 218.34l-50.07-50.06a88.21 88.21 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg>'); background-repeat: no-repeat; background-position: 12px center; }
+    .cn__search:focus { border-color: var(--color-accent-1); }
+    .cn__card { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px; display: flex; gap: 12px; margin-bottom: 8px; }
+    .cn__thumb { width: 56px; height: 80px; border-radius: 4px; background-size: cover; background-position: center; flex-shrink: 0; }
+    .cn__body { flex: 1; min-width: 0; }
+    .cn__name { font-weight: 700; font-size: var(--text-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cn__meta { font-size: 11px; color: var(--color-text-3); display: flex; gap: 6px; margin-top: 4px; }
+    .cn__stats { display: flex; gap: 8px; margin-top: 6px; font-size: 11px; color: var(--color-text-2); }
+    .cn__stat-val { color: var(--color-text-1); font-weight: 700; }
+    .cn__source { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 5px; border-radius: 3px; margin-top: 6px; }
+    .cn__source--original { background: rgba(255, 31, 90, 0.15); color: var(--color-accent-1); }
+    .cn__source--creator   { background: rgba(255, 226, 122, 0.15); color: var(--color-gold-1); }
+    .cn__source--tmdb      { background: rgba(46, 212, 122, 0.15); color: var(--color-success); }
+    .cn__actions { display: flex; flex-direction: column; gap: 4px; }
+    .cn__icon-btn { width: 28px; height: 28px; border-radius: 6px; background: var(--color-bg-elev-2); border: none; color: var(--color-text-2); cursor: pointer; display: grid; place-items: center; font-size: 14px; }
+    .cn__icon-btn:hover { color: var(--color-accent-1); }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Content"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="cn">
+      <div class="cn__title">All series</div>
+      <input class="cn__search" id="search" placeholder="Search by title, creator, TMDB ID…">
+      <div class="cn__filter">
+        <button class="chip chip--selected" data-src="all">All</button>
+        <button class="chip" data-src="original">Originals</button>
+        <button class="chip" data-src="creator">Creator</button>
+        <button class="chip" data-src="tmdb">From TMDB</button>
+      </div>
+      <div id="list"></div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    if (vidashort.Storage.getRole() !== 'admin') vidashort.Storage.setRole('admin');
+
+    const all = [
+      ...vidashort.MockData.series.map(s => ({ ...s, source: 'original' })),
+      ...vidashort.MockData.creatorSeries.map(s => ({ ...s, source: 'creator' })),
+    ];
+
+    function sourcePill(s) {
+      if (s.source === 'creator')  return '<span class="cn__source cn__source--creator">CREATOR</span>';
+      if (s.tmdbId)                return '<span class="cn__source cn__source--tmdb">TMDB</span>';
+      return '<span class="cn__source cn__source--original">ORIGINAL</span>';
+    }
+
+    function render(filter, q) {
+      let list = all;
+      if (filter !== 'all') list = list.filter(s => s.source === filter);
+      if (q) list = list.filter(s => s.title.toLowerCase().includes(q.toLowerCase()) || (s.copyrightOwner || '').toLowerCase().includes(q.toLowerCase()));
+      const el = document.getElementById('list');
+      if (!list.length) { el.innerHTML = '<div style="text-align:center; padding:32px; color:var(--color-text-3); font-size:13px;">No results.</div>'; return; }
+      el.innerHTML = list.map(s => `
+        <div class="cn__card">
+          <div class="cn__thumb" style="background-image:url('${s.cover}');"></div>
+          <div class="cn__body">
+            <div class="cn__name">${s.title}</div>
+            <div class="cn__meta">
+              <span>${s.totalEpisodes} ep</span>
+              <span>•</span>
+              <span>${s.category}</span>
+              <span>•</span>
+              <span>${s.allowedCountries.length} regions</span>
+            </div>
+            <div class="cn__stats">
+              <span><span class="cn__stat-val">${(s.views || 0).toLocaleString()}</span> views</span>
+              <span><span class="cn__stat-val">${s.rating || '—'}</span> ★</span>
+            </div>
+            ${sourcePill(s)}
+          </div>
+          <div class="cn__actions">
+            <button class="cn__icon-btn" title="Edit"><i class="ph ph-pencil-simple"></i></button>
+            <button class="cn__icon-btn" title="Hide"><i class="ph ph-eye-slash"></i></button>
+            <button class="cn__icon-btn" title="Delete" style="color:var(--color-error);"><i class="ph ph-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+    render('all', '');
+
+    document.getElementById('search').addEventListener('input', e => {
+      const active = document.querySelector('.chip--selected');
+      render(active ? active.dataset.src : 'all', e.target.value);
+    });
+    document.querySelector('.cn__filter').addEventListener('click', e => {
+      const c = e.target.closest('.chip');
+      if (!c) return;
+      document.querySelectorAll('.chip').forEach(x => x.classList.toggle('chip--selected', x === c));
+      render(c.dataset.src, document.getElementById('search').value);
+    });
+  </script>
+</body>
+</html>

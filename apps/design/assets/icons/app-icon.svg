@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  app-icon.svg — STOPGAP reconstruction (no text; pure geometry).
+  Brand spec: docs/brand/00-overview.md § 9.
+
+  This file is a best-effort rebuild from the deleted original. It contains
+  no <text> elements (so no font fallback), matches the brand's locked color
+  tokens, and uses the same V+play bbox as buildAndroidForegroundSvg in
+  mobile/scripts/generate-icons.mjs so the Android adaptive layer stays
+  in sync. The drop-shadow filter is omitted on purpose (the OS supplies
+  elevation on both iOS and Android).
+
+  TODO(brand): replace with the real Figma source when available. The
+  original was clearly hand-tuned by a designer; this version is a faithful
+  geometric placeholder. Drop a file named app-icon.baked.svg alongside
+  this one (or replace this one entirely) and re-run `npm run icons`.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background gradient: light pink top-left → magenta → crimson -->
+    <linearGradient id="ai-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#ff4d80"/>
+      <stop offset="55%" stop-color="#ff1f5a"/>
+      <stop offset="100%" stop-color="#b3002b"/>
+    </linearGradient>
+
+    <!-- White halo radial behind the V -->
+    <radialGradient id="ai-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- V+play front face gradient (matches buildAndroidForegroundSvg) -->
+    <linearGradient id="ai-front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ff4d80"/>
+      <stop offset="50%" stop-color="#ff1f5a"/>
+      <stop offset="100%" stop-color="#b3002b"/>
+    </linearGradient>
+
+    <!-- 3D extrude side (darker, for depth on the V's back face) -->
+    <linearGradient id="ai-side" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#7a001e"/>
+      <stop offset="100%" stop-color="#4a0014"/>
+    </linearGradient>
+
+    <!-- Top-edge highlight on each V arm -->
+    <linearGradient id="ai-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#fff5c4" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff4d80" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Gold rim light on the V's inner edge -->
+    <linearGradient id="ai-rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffe27a"/>
+      <stop offset="100%" stop-color="#d4a017"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded-square background (rx=220 matches iOS continuous corner radius) -->
+  <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="url(#ai-bg)"/>
+  <rect x="0" y="0" width="1024" height="1024" rx="220" ry="220" fill="url(#ai-halo)"/>
+
+  <!-- V+play back face (offset slightly down-right for 3D extrude) -->
+  <g opacity="0.85">
+    <path d="M 260 290 L 410 290 L 512 600 L 614 290 L 764 290 L 614 740 L 512 740 Z" fill="url(#ai-side)"/>
+    <path d="M 614 290 L 820 460 L 820 540 L 614 740 Z" fill="url(#ai-side)"/>
+  </g>
+
+  <!-- V+play front face -->
+  <path d="M 260 290 L 410 290 L 512 600 L 614 290 L 764 290 L 614 740 L 512 740 Z" fill="url(#ai-front)"/>
+
+  <!-- Top-edge highlights on both arms of the V -->
+  <path d="M 260 290 L 410 290 L 418 310 L 268 310 Z" fill="url(#ai-top)"/>
+  <path d="M 614 290 L 764 290 L 758 310 L 622 310 Z" fill="url(#ai-top)"/>
+
+  <!-- Gold rim light down the inner V crease -->
+  <path d="M 410 290 L 512 600 L 514 600 L 414 290 Z" fill="url(#ai-rim)" opacity="0.55"/>
+
+  <!-- Play triangle (right arm of V extends into a play button) -->
+  <path d="M 614 290 L 820 460 L 820 540 L 614 740 Z" fill="url(#ai-front)"/>
+  <path d="M 614 290 L 820 460 L 818 470 L 622 310 Z" fill="url(#ai-top)"/>
+</svg>

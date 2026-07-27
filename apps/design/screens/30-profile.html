@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Profile</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .pf { padding: 0 20px; }
+    .pf__hero { text-align: center; padding: 16px 0 8px; }
+    .pf__avatar { width: 84px; height: 84px; border-radius: 50%; background-size: cover; background-position: center; margin: 0 auto 8px; border: 3px solid var(--color-accent-1); box-shadow: var(--glow-magenta); }
+    .pf__name { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: var(--text-xl); }
+    .pf__handle { color: var(--color-text-2); font-size: var(--text-sm); }
+    .pf__vip { display: inline-flex; align-items: center; gap: 4px; background: var(--gradient-gold); color: #1a0e00; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 999px; margin-top: 6px; }
+    .pf__stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+    .pf__stat { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px; text-align: center; }
+    .pf__stat-val { font-weight: 800; font-size: var(--text-lg); font-variant-numeric: tabular-nums; }
+    .pf__stat-lbl { font-size: 10px; color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .pf__balance { background: var(--gradient-accent); color: white; border-radius: var(--radius-lg); padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .pf__balance-label { font-size: 11px; opacity: 0.85; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+    .pf__balance-amt { font-weight: 800; font-size: 24px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .pf__balance-btn { background: white; color: var(--color-accent-1); font-weight: 800; padding: 8px 14px; border-radius: 999px; font-size: 12px; }
+    .pf__section { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 12px; overflow: hidden; }
+    .pf__row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--color-border); cursor: pointer; transition: background var(--duration-fast); }
+    .pf__row:last-child { border-bottom: none; }
+    .pf__row:hover { background: var(--color-bg-elev-2); }
+    .pf__row i { font-size: 20px; color: var(--color-text-2); width: 24px; text-align: center; }
+    .pf__row-label { flex: 1; font-size: var(--text-sm); font-weight: 600; }
+    .pf__row-detail { font-size: 11px; color: var(--color-text-3); }
+    .pf__row-arrow { color: var(--color-text-3); font-size: 14px; }
+    .pf__row--danger i, .pf__row--danger .pf__row-label { color: var(--color-error); }
+    .pf__ad { margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title=""></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="pf">
+      <div class="pf__hero">
+        <div class="pf__avatar" id="avatar"></div>
+        <div class="pf__name" id="name">Maya</div>
+        <div class="pf__handle" id="handle">@maya_watches</div>
+        <span class="pf__vip" id="vipBadge" style="display:none;"><i class="ph-fill ph-crown" style="font-size:11px;"></i> VIP</span>
+      </div>
+
+      <div class="pf__stats">
+        <div class="pf__stat"><div class="pf__stat-val" id="sEp">0</div><div class="pf__stat-lbl">Episodes</div></div>
+        <div class="pf__stat"><div class="pf__stat-val" id="sHr">0</div><div class="pf__stat-lbl">Hours</div></div>
+        <div class="pf__stat"><div class="pf__stat-val" id="sFav">0</div><div class="pf__stat-lbl">Favorites</div></div>
+      </div>
+
+      <div class="pf__balance">
+        <div>
+          <div class="pf__balance-label">Your balance</div>
+          <div class="pf__balance-amt" id="bal">0 coins</div>
+        </div>
+        <a class="pf__balance-btn" href="./21-wallet.html">Top up</a>
+      </div>
+
+      <div class="pf__section">
+        <a class="pf__row" href="./20-library.html">
+          <i class="ph-bold ph-bookmark-simple"></i>
+          <div class="pf__row-label">My library</div>
+          <i class="ph ph-caret-right pf__row-arrow"></i>
+        </a>
+        <a class="pf__row" href="./24-daily-reward.html">
+          <i class="ph-bold ph-fire"></i>
+          <div class="pf__row-label">Daily check-in</div>
+          <div class="pf__row-detail" id="streak">5 day streak</div>
+          <i class="ph ph-caret-right pf__row-arrow"></i>
+        </a>
+        <a class="pf__row" href="./22-coin-store.html">
+          <i class="ph-bold ph-coins"></i>
+          <div class="pf__row-label">Coin store</div>
+          <i class="ph ph-caret-right pf__row-arrow"></i>
+        </a>
+        <a class="pf__row" href="./23-vip.html">
+          <i class="ph-bold ph-crown"></i>
+          <div class="pf__row-label">Go VIP</div>
+          <i class="ph ph-caret-right pf__row-arrow"></i>
+        </a>
+      </div>
+
+      <div class="pf__section">
+        <a class="pf__row" href="./32-notifications.html">
+          <i class="ph-bold ph-bell"></i>
+          <div class="pf__row-label">Notifications</div>
+          <i class="ph ph-caret-right pf__row-arrow"></i>
+        </a>
+        <a class="pf__row" href="./31-settings.html">
+          <i class="ph-bold ph-gear-six"></i>
+          <div class="pf__row-label">Settings</div>
+          <i class="ph ph-caret-right pf__row-arrow"></i>
+        </a>
+        <a class="pf__row" id="switchRole">
+          <i class="ph-bold ph-swap"></i>
+          <div class="pf__row-label">Switch role</div>
+          <div class="pf__row-detail" id="currentRole">viewer</div>
+          <i class="ph ph-caret-right pf__row-arrow"></i>
+        </a>
+        <a class="pf__row pf__row--danger" id="signout">
+          <i class="ph-bold ph-sign-out"></i>
+          <div class="pf__row-label">Sign out</div>
+        </a>
+      </div>
+
+      <div class="ad-banner pf__ad">
+        <span class="ad-banner__pill">Sponsored</span>
+        <div class="ad-banner__title">Install <span>Acme VPN</span> — Free for 7 days</div>
+        <button class="ad-banner__cta">Install</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const auth = vidashort.Storage.getAuth();
+    const user = vidashort.MockData.user;
+    document.getElementById('avatar').style.backgroundImage = `url('${user.avatar}')`;
+    document.getElementById('name').textContent = (auth && auth.name) || user.name;
+    document.getElementById('handle').textContent = (auth && auth.email) ? '@' + auth.email.split('@')[0] : user.username;
+    document.getElementById('bal').textContent = vidashort.Storage.getCoins().toLocaleString() + ' coins';
+    document.getElementById('sEp').textContent = user.episodesWatched;
+    document.getElementById('sHr').textContent = user.hoursWatched;
+    document.getElementById('sFav').textContent = user.favoritesCount;
+    const streak = vidashort.Storage.getStreak();
+    document.getElementById('streak').textContent = `${streak.day || user.streak} day streak`;
+    if (vidashort.Storage.isVIP()) document.getElementById('vipBadge').style.display = '';
+    document.getElementById('currentRole').textContent = vidashort.Storage.getRole();
+
+    document.getElementById('switchRole').addEventListener('click', () => {
+      const r = vidashort.Storage.getRole();
+      const next = r === 'viewer' ? 'creator' : r === 'creator' ? 'admin' : 'viewer';
+      vidashort.Storage.setRole(next);
+      vidashort.Toast.show(`Switched to ${next}`, 'info');
+      if (next === 'creator') location.href = './50-creator-dashboard.html';
+      else if (next === 'admin') location.href = './60-admin-overview.html';
+      else location.href = './10-home.html';
+    });
+
+    document.getElementById('signout').addEventListener('click', () => {
+      vidashort.Confirm.open({
+        title: 'Sign out?',
+        body: 'You can sign back in any time.',
+        confirmLabel: 'Sign out',
+        danger: true,
+        onConfirm: () => { vidashort.Storage.signOut(); location.href = './00-splash.html'; }
+      });
+    });
+  </script>
+</body>
+</html>

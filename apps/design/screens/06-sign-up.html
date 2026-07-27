@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Create account</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .signup { height: 100%; display: flex; flex-direction: column; padding: 0 24px; }
+    .signup__top { padding: 56px 0 24px; }
+    .signup__back { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: var(--color-text-1); cursor: pointer; margin-bottom: 16px; }
+    .signup__title { font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: var(--text-2xl); margin-bottom: 8px; }
+    .signup__sub { color: var(--color-text-2); font-size: var(--text-sm); }
+    .signup__form { flex: 1; display: flex; flex-direction: column; gap: 16px; padding-top: 24px; }
+    .signup__actions { padding: 16px 0 32px; }
+    .signup__alt { text-align: center; padding: 8px 0 24px; font-size: var(--text-sm); color: var(--color-text-2); }
+    .signup__alt a { color: var(--color-accent-3); font-weight: 600; cursor: pointer; }
+    .input-error-msg { color: var(--color-error); font-size: 12px; margin-top: 4px; min-height: 16px; }
+    .pw-strength { height: 4px; background: var(--color-bg-elev-1); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .pw-strength__bar { height: 100%; width: 0; background: var(--color-error); transition: all var(--duration-base); }
+  </style>
+</head>
+<body>
+  <main class="screen" data-direction="forward">
+    <div class="signup">
+      <div class="signup__top">
+        <div class="signup__back" data-nav="back"><i class="ph ph-arrow-left" style="font-size:22px;"></i></div>
+        <h1 class="signup__title">Create your account</h1>
+        <p class="signup__sub">50 free coins when you sign up.</p>
+      </div>
+
+      <form class="signup__form" id="form" autocomplete="off">
+        <div>
+          <label class="label" for="email">Email</label>
+          <div class="input-group">
+            <i class="ph ph-envelope input-group__icon"></i>
+            <input class="input input--with-icon" id="email" type="email" placeholder="you@example.com" required>
+          </div>
+          <div class="input-error-msg" id="emailErr"></div>
+        </div>
+
+        <div>
+          <label class="label" for="pw">Password</label>
+          <div class="input-group">
+            <i class="ph ph-lock input-group__icon"></i>
+            <input class="input input--with-icon" id="pw" type="password" placeholder="At least 8 characters" required>
+            <span class="input-group__action" id="togglePw">Show</span>
+          </div>
+          <div class="pw-strength"><div class="pw-strength__bar" id="pwBar"></div></div>
+        </div>
+
+        <div>
+          <label class="label" for="pw2">Confirm password</label>
+          <div class="input-group">
+            <i class="ph ph-lock input-group__icon"></i>
+            <input class="input input--with-icon" id="pw2" type="password" placeholder="Re-enter your password" required>
+          </div>
+          <div class="input-error-msg" id="pw2Err"></div>
+        </div>
+
+        <label class="checkbox">
+          <input type="checkbox" id="terms" required>
+          <span class="checkbox__box"></span>
+          <span class="checkbox__label">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> and confirm I am 17 or older.</span>
+        </label>
+      </form>
+
+      <div class="signup__actions">
+        <button class="btn btn--primary btn--lg btn--block" id="submit">Create account</button>
+      </div>
+      <div class="signup__alt">Already have an account? <a data-nav="signin">Sign in</a></div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script>
+    const emailEl = document.getElementById('email');
+    const pwEl = document.getElementById('pw');
+    const pw2El = document.getElementById('pw2');
+    const termsEl = document.getElementById('terms');
+    const submit = document.getElementById('submit');
+    const togglePw = document.getElementById('togglePw');
+    const pwBar = document.getElementById('pwBar');
+
+    togglePw.addEventListener('click', () => {
+      const t = pwEl.type === 'password' ? 'text' : 'password';
+      pwEl.type = t; pw2El.type = t;
+      togglePw.textContent = t === 'password' ? 'Show' : 'Hide';
+    });
+
+    function pwStrength(p) {
+      let s = 0;
+      if (p.length >= 8) s++;
+      if (/[A-Z]/.test(p)) s++;
+      if (/[0-9]/.test(p)) s++;
+      if (/[^A-Za-z0-9]/.test(p)) s++;
+      return s; // 0-4
+    }
+    pwEl.addEventListener('input', () => {
+      const s = pwStrength(pwEl.value);
+      const w = (s / 4) * 100;
+      pwBar.style.width = w + '%';
+      pwBar.style.background = s <= 1 ? 'var(--color-error)' : s <= 2 ? 'var(--color-warning)' : 'var(--color-success)';
+    });
+
+    function isEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+    submit.addEventListener('click', () => {
+      const email = emailEl.value.trim();
+      const pw = pwEl.value;
+      const pw2 = pw2El.value;
+      let ok = true;
+      document.getElementById('emailErr').textContent = '';
+      document.getElementById('pw2Err').textContent = '';
+      emailEl.classList.remove('input--error');
+      pw2El.classList.remove('input--error');
+
+      if (!isEmail(email)) { document.getElementById('emailErr').textContent = 'Enter a valid email.'; emailEl.classList.add('input--error'); ok = false; }
+      if (pw.length < 8) { vidashort.Toast.show('Password must be 8+ characters', 'error'); ok = false; }
+      if (pw !== pw2) { document.getElementById('pw2Err').textContent = 'Passwords do not match.'; pw2El.classList.add('input--error'); ok = false; }
+      if (!termsEl.checked) { vidashort.Toast.show('Please accept the terms', 'error'); ok = false; }
+      if (!ok) { vidashort.Haptics.error(); return; }
+
+      submit.setAttribute('aria-busy', 'true');
+      setTimeout(() => {
+        vidashort.Storage.setAuth({ provider: 'email', name: email.split('@')[0], email });
+        vidashort.Storage.addCoins(50, 'welcome_bonus');
+        vidashort.Haptics.success();
+        vidashort.Toast.show('Welcome! 50 coins added.', 'success');
+        vidashort.Confetti.burst({ originX: 50, originY: 60 });
+        setTimeout(() => vidashort.Router.go('./10-home.html'), 700);
+      }, 800);
+    });
+
+    document.querySelector('[data-nav="back"]').addEventListener('click', () => vidashort.Router.back());
+    document.querySelector('[data-nav="signin"]').addEventListener('click', () => vidashort.Router.go('./07-sign-in.html'));
+  </script>
+</body>
+</html>

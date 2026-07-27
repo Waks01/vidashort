@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0608">
+  <title>vidashort — Settings</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/app-icon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+  <link rel="stylesheet" href="../styles/tokens.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding-top: 56px; padding-bottom: 72px; overflow-y: auto; }
+    .st { padding: 0 20px; }
+    .st__group { background: var(--color-bg-elev-1); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 16px; overflow: hidden; }
+    .st__row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--color-border); cursor: pointer; transition: background var(--duration-fast); }
+    .st__row:last-child { border-bottom: none; }
+    .st__row:hover { background: var(--color-bg-elev-2); }
+    .st__row i.icon { font-size: 20px; color: var(--color-text-2); width: 24px; text-align: center; }
+    .st__row-label { flex: 1; font-size: var(--text-sm); font-weight: 600; }
+    .st__row-detail { font-size: 11px; color: var(--color-text-3); }
+    .st__row-arrow { color: var(--color-text-3); font-size: 14px; }
+    .st__row--danger .st__row-label, .st__row--danger i.icon { color: var(--color-error); }
+    .st__switch { position: relative; width: 40px; height: 24px; background: var(--color-bg-elev-2); border-radius: 999px; cursor: pointer; transition: background var(--duration-fast); }
+    .st__switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: all var(--duration-fast); }
+    .st__switch--on { background: var(--color-success); }
+    .st__switch--on::after { left: 18px; }
+    .st__version { text-align: center; color: var(--color-text-3); font-size: 11px; padding: 16px 0 8px; }
+  </style>
+</head>
+<body>
+  <div id="chrome-topbar" data-title="Settings" data-back="true"></div>
+  <div id="chrome-bottomnav"></div>
+
+  <main class="screen" data-direction="forward">
+    <div class="st">
+      <div class="st__group">
+        <a class="st__row" data-nav="account">
+          <i class="ph-bold ph-user-circle icon"></i>
+          <div class="st__row-label">Account</div>
+          <div class="st__row-detail" id="email">maya@example.com</div>
+          <i class="ph ph-caret-right st__row-arrow"></i>
+        </a>
+        <a class="st__row" href="./32-notifications.html">
+          <i class="ph-bold ph-bell icon"></i>
+          <div class="st__row-label">Push notifications</div>
+          <div class="st__row-detail">On</div>
+          <i class="ph ph-caret-right st__row-arrow"></i>
+        </a>
+        <a class="st__row" id="lang">
+          <i class="ph-bold ph-translate icon"></i>
+          <div class="st__row-label">Language</div>
+          <div class="st__row-detail">English</div>
+          <i class="ph ph-caret-right st__row-arrow"></i>
+        </a>
+      </div>
+
+      <div class="st__group">
+        <a class="st__row">
+          <i class="ph-bold ph-download-simple icon"></i>
+          <div class="st__row-label">Downloads</div>
+          <div class="st__row-detail">Auto over Wi-Fi</div>
+          <i class="ph ph-caret-right st__row-arrow"></i>
+        </a>
+        <a class="st__row">
+          <i class="ph-bold ph-play icon"></i>
+          <div class="st__row-label">Playback quality</div>
+          <div class="st__row-detail">Cellular: 480p</div>
+          <i class="ph ph-caret-right st__row-arrow"></i>
+        </a>
+        <div class="st__row">
+          <i class="ph-bold ph-eye icon"></i>
+          <div class="st__row-label">Autoplay next episode</div>
+          <div class="st__switch st__switch--on" id="autoplay"></div>
+        </div>
+        <div class="st__row">
+          <i class="ph-bold ph-cell-signal-high icon"></i>
+          <div class="st__row-label">Data saver</div>
+          <div class="st__switch" id="saver"></div>
+        </div>
+      </div>
+
+      <div class="st__group">
+        <a class="st__row" id="switchRole">
+          <i class="ph-bold ph-swap icon"></i>
+          <div class="st__row-label">Switch role</div>
+          <div class="st__row-detail" id="role">viewer</div>
+          <i class="ph ph-caret-right st__row-arrow"></i>
+        </a>
+        <a class="st__row" id="adminMode" style="display:none;" href="./60-admin-overview.html">
+          <i class="ph-bold ph-shield-check icon"></i>
+          <div class="st__row-label">Admin panel</div>
+          <i class="ph ph-caret-right st__row-arrow"></i>
+        </a>
+        <a class="st__row" id="creatorMode" style="display:none;" href="./50-creator-dashboard.html">
+          <i class="ph-bold ph-video-camera icon"></i>
+          <div class="st__row-label">Creator studio</div>
+          <i class="ph ph-caret-right st__row-arrow"></i>
+        </a>
+      </div>
+
+      <div class="st__group">
+        <a class="st__row"><i class="ph-bold ph-shield-check icon"></i><div class="st__row-label">Privacy & data</div><i class="ph ph-caret-right st__row-arrow"></i></a>
+        <a class="st__row"><i class="ph-bold ph-question icon"></i><div class="st__row-label">Help & support</div><i class="ph ph-caret-right st__row-arrow"></i></a>
+        <a class="st__row"><i class="ph-bold ph-file-text icon"></i><div class="st__row-label">Terms of Service</div><i class="ph ph-caret-right st__row-arrow"></i></a>
+        <a class="st__row"><i class="ph-bold ph-info icon"></i><div class="st__row-label">About</div><div class="st__row-detail">v0.1.0 prototype</div><i class="ph ph-caret-right st__row-arrow"></i></a>
+      </div>
+
+      <div class="st__group">
+        <a class="st__row st__row--danger" id="signout"><i class="ph-bold ph-sign-out icon"></i><div class="st__row-label">Sign out</div></a>
+        <a class="st__row st__row--danger" id="delete"><i class="ph-bold ph-trash icon"></i><div class="st__row-label">Delete account</div></a>
+      </div>
+
+      <div class="st__version">vidashort v0.1.0 prototype</div>
+    </div>
+  </main>
+
+  <script src="../scripts/data.js"></script>
+  <script src="../scripts/app.js"></script>
+  <script src="../scripts/chrome.js"></script>
+  <script>
+    const auth = vidashort.Storage.getAuth();
+    document.getElementById('email').textContent = (auth && auth.email) || 'maya@example.com';
+    document.getElementById('role').textContent = vidashort.Storage.getRole();
+
+    // Show admin / creator shortcuts when those roles are unlocked
+    if (vidashort.Storage.getRole() === 'admin' || vidashort.Storage.get('user.isAdmin', false)) {
+      document.getElementById('adminMode').style.display = '';
+    }
+    if (vidashort.Storage.getRole() === 'creator' || vidashort.Storage.getCreatorProfile()) {
+      document.getElementById('creatorMode').style.display = '';
+    }
+
+    document.querySelectorAll('.st__switch').forEach(s => s.addEventListener('click', () => {
+      s.classList.toggle('st__switch--on');
+      vidashort.Haptics.tap();
+    }));
+
+    document.getElementById('switchRole').addEventListener('click', () => {
+      const r = vidashort.Storage.getRole();
+      const next = r === 'viewer' ? 'creator' : r === 'creator' ? 'admin' : 'viewer';
+      vidashort.Storage.setRole(next);
+      vidashort.Toast.show(`Switched to ${next}`, 'info');
+      setTimeout(() => location.reload(), 400);
+    });
+
+    document.getElementById('signout').addEventListener('click', () => {
+      vidashort.Confirm.open({
+        title: 'Sign out?',
+        confirmLabel: 'Sign out', danger: true,
+        onConfirm: () => { vidashort.Storage.signOut(); location.href = './00-splash.html'; }
+      });
+    });
+
+    document.getElementById('delete').addEventListener('click', () => {
+      vidashort.Confirm.open({
+        title: 'Delete your account?',
+        body: 'This will permanently delete your profile, watch history, and any remaining coins. This cannot be undone.',
+        confirmLabel: 'Delete forever', danger: true,
+        onConfirm: () => { vidashort.Storage.clear(); location.href = './00-splash.html'; }
+      });
+    });
+  </script>
+</body>
+</html>
