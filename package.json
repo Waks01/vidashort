@@ -1,9 +1,14 @@
 {
   "name": "vidashort",
   "private": true,
+  "workspaces": [
+    "mobile",
+    "packages/*"
+  ],
   "scripts": {
     "mobile": "cd mobile && npx expo start",
     "typecheck": "cd mobile && npx tsc --noEmit",
+    "shared:typecheck": "cd packages/shared && npx tsc --noEmit",
     "lint": "cd mobile && npx expo lint"
   }
 }

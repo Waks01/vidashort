@@ -6,7 +6,7 @@ from app.db.models import ModerationItem
 
 async def enqueue_series(db: AsyncSession, series_id: str, reason: str, auto_flagged: bool = False):
     item = ModerationItem(
-        id=__import__("uuid").uuid4(),
+        id=str(__import__("uuid").uuid4()),
         kind="series",
         ref_id=series_id,
         reason=reason,
@@ -18,7 +18,7 @@ async def enqueue_series(db: AsyncSession, series_id: str, reason: str, auto_fla
 
 async def enqueue_comment(db: AsyncSession, comment_id: str, reason: str, auto_flagged: bool = False):
     item = ModerationItem(
-        id=__import__("uuid").uuid4(),
+        id=str(__import__("uuid").uuid4()),
         kind="comment",
         ref_id=comment_id,
         reason=reason,
@@ -30,7 +30,7 @@ async def enqueue_comment(db: AsyncSession, comment_id: str, reason: str, auto_f
 
 async def enqueue_account(db: AsyncSession, user_id: str, reason: str, auto_flagged: bool = False):
     item = ModerationItem(
-        id=__import__("uuid").uuid4(),
+        id=str(__import__("uuid").uuid4()),
         kind="account",
         ref_id=user_id,
         reason=reason,

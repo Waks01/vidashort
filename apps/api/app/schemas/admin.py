@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from app.core.pydantic_base import BaseSchema
 
 
-class AdminOverviewResponse(BaseModel):
+class AdminOverviewResponse(BaseSchema):
     gmv_naira: float
     net_revenue_naira: float
     dau: int
@@ -15,7 +15,7 @@ class AdminOverviewResponse(BaseModel):
     top_series: list[dict]
 
 
-class AdminModerationItem(BaseModel):
+class AdminModerationItem(BaseSchema):
     id: str
     kind: str
     ref_id: str
@@ -26,24 +26,24 @@ class AdminModerationItem(BaseModel):
     preview: dict | None = None
 
 
-class AdminModerationResponse(BaseModel):
+class AdminModerationResponse(BaseSchema):
     items: list[AdminModerationItem]
     next_cursor: str | None = None
 
 
-class AdminModerationDecideRequest(BaseModel):
+class AdminModerationDecideRequest(BaseSchema):
     decision: str
     note: str | None = None
 
 
-class AdminUserUpdateRequest(BaseModel):
+class AdminUserUpdateRequest(BaseSchema):
     role: str | None = None
     banned: bool | None = None
     ban_reason: str | None = None
     refund_coins: int | None = None
 
 
-class AdminAdCampaignItem(BaseModel):
+class AdminAdCampaignItem(BaseSchema):
     id: str
     name: str
     network: str
@@ -57,7 +57,7 @@ class AdminAdCampaignItem(BaseModel):
     updated_at: str
 
 
-class AdminFinanceResponse(BaseModel):
+class AdminFinanceResponse(BaseSchema):
     net_revenue_naira: float
     gross_coin_sales_naira: float
     creator_liability_naira: float
@@ -65,6 +65,6 @@ class AdminFinanceResponse(BaseModel):
     ledger: list[dict]
 
 
-class AdminPayoutDecideRequest(BaseModel):
+class AdminPayoutDecideRequest(BaseSchema):
     decision: str
     note: str | None = None

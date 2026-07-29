@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from app.core.pydantic_base import BaseSchema
 
 
-class CoinTxnItem(BaseModel):
+class CoinTxnItem(BaseSchema):
     id: str
     delta: int
     reason: str
@@ -10,7 +10,7 @@ class CoinTxnItem(BaseModel):
     created_at: str
 
 
-class BalanceResponse(BaseModel):
+class BalanceResponse(BaseSchema):
     coins: int
     lifetime_purchased: int
     lifetime_spent: int
@@ -19,7 +19,7 @@ class BalanceResponse(BaseModel):
     recent: list[CoinTxnItem]
 
 
-class PackItem(BaseModel):
+class PackItem(BaseSchema):
     id: str
     coins: int
     bonus_coins: int
@@ -31,22 +31,22 @@ class PackItem(BaseModel):
     google_product_id: str
 
 
-class PacksResponse(BaseModel):
+class PacksResponse(BaseSchema):
     packs: list[PackItem]
 
 
-class PurchaseReceipt(BaseModel):
+class PurchaseReceipt(BaseSchema):
     provider: str
     data: str
     txn_id: str
 
 
-class PurchaseRequest(BaseModel):
+class PurchaseRequest(BaseSchema):
     pack_id: str
     receipt: PurchaseReceipt
 
 
-class PurchaseResponse(BaseModel):
+class PurchaseResponse(BaseSchema):
     coins: int
     txn_id: str
     credited_coins: int

@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from app.core.pydantic_base import BaseSchema
 
 
-class SeriesItem(BaseModel):
+class SeriesItem(BaseSchema):
     id: str
     slug: str
     title: str
@@ -20,7 +20,7 @@ class SeriesItem(BaseModel):
     created_at: str
 
 
-class EpisodeMeta(BaseModel):
+class EpisodeMeta(BaseSchema):
     number: int
     title: str
     synopsis: str | None = None
@@ -30,27 +30,27 @@ class EpisodeMeta(BaseModel):
     thumbnail_url: str | None = None
 
 
-class SeriesDetail(BaseModel):
+class SeriesDetail(BaseSchema):
     series: SeriesItem
     episodes: list[EpisodeMeta]
 
 
-class SeriesListResponse(BaseModel):
+class SeriesListResponse(BaseSchema):
     items: list[SeriesItem]
     next_cursor: str | None = None
 
 
-class StreamResponse(BaseModel):
+class StreamResponse(BaseSchema):
     episode_id: str
     playback_url: str
     expires_at: str
     captions_url: str | None = None
     preroll_ad: dict | None = None
     midroll_at_s: int | None = None
-    poster_url: str
+    poster_url: str | None = None
 
 
-class PaywallDecisionSchema(BaseModel):
+class PaywallDecisionSchema(BaseSchema):
     path: str
     cost_coins: int
     reward_coins: int
@@ -58,17 +58,17 @@ class PaywallDecisionSchema(BaseModel):
     label: str
 
 
-class EntitlementError(BaseModel):
+class EntitlementError(BaseSchema):
     error: str
     message: str
     details: dict | None = None
 
 
-class FavoriteResponse(BaseModel):
+class FavoriteResponse(BaseSchema):
     ok: bool = True
 
 
-class FeaturedItem(BaseModel):
+class FeaturedItem(BaseSchema):
     episode_id: str
     series_id: str
     slot: str
@@ -76,5 +76,5 @@ class FeaturedItem(BaseModel):
     sponsor: str | None = None
 
 
-class FeaturedResponse(BaseModel):
+class FeaturedResponse(BaseSchema):
     items: list[FeaturedItem]

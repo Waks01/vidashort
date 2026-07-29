@@ -19,6 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.execute(text("CREATE EXTENSION IF NOT EXISTS pgcrypto"))
+    op.execute(text("CREATE EXTENSION IF NOT EXISTS citext"))
     op.create_table(
         "users",
         sa.Column("id", UUID, server_default=text("gen_random_uuid()"), primary_key=True),
@@ -36,7 +37,7 @@ def upgrade() -> None:
         sa.Column("ban_reason", sa.Text),
         sa.Column("deleted_at", sa.DateTime(timezone=True)),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()), onupdate=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), onupdate=sa.text("now()"), nullable=False),
     )
     op.create_index("idx_users_role", "users", ["role"], postgresql_where=sa.text("role != 'viewer'"))
     op.create_index("idx_users_deleted_at", "users", ["deleted_at"], postgresql_where=sa.text("deleted_at IS NULL"))
@@ -96,7 +97,7 @@ def upgrade() -> None:
         sa.Column("total_episodes", sa.Integer, server_default="0", nullable=False),
         sa.Column("rating", sa.Numeric(3, 2), server_default="0", nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()), onupdate=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), onupdate=sa.text("now()"), nullable=False),
     )
     op.create_index("idx_series_published", "series", ["is_published", "total_episodes"], postgresql_where=sa.text("is_published = true"))
     op.create_index("idx_series_category", "series", ["category"], postgresql_where=sa.text("is_published = true"))
@@ -118,7 +119,7 @@ def upgrade() -> None:
         sa.Column("ad_midroll_at_s", sa.Integer),
         sa.Column("thumbnail_url", sa.Text),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()), onupdate=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), onupdate=sa.text("now()"), nullable=False),
         sa.UniqueConstraint("series_id", "number", name="uq_episode_series_number"),
     )
     op.create_index("idx_episodes_series", "episodes", ["series_id", "number"])
@@ -208,7 +209,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.UniqueConstraint("user_id", "ad_id", name="uq_ad_impression_user_ad"),
     )
-    op.create_index("idx_ad_impressions_user_daily", "ad_impressions", ["user_id", sa.text("created_at::date")])
+    op.create_index("idx_ad_impressions_user_daily", "ad_impressions", ["user_id", sa.text("((created_at AT TIME ZONE 'UTC')::date)")])
     op.create_index("idx_ad_impressions_type", "ad_impressions", ["ad_type", "created_at"])
     op.create_table(
         "vip_entitlements",
@@ -221,7 +222,7 @@ def upgrade() -> None:
         sa.Column("auto_renew", sa.Boolean, server_default="true", nullable=False),
         sa.Column("original_txn_id", sa.String(255)),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()), onupdate=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), onupdate=sa.text("now()"), nullable=False),
     )
     op.create_index("idx_vip_entitlements_user_active", "vip_entitlements", ["user_id", "expires_at"])
     op.create_table(
@@ -270,7 +271,7 @@ def upgrade() -> None:
     op.create_foreign_key("fk_payout_requests_creator_id", "payout_requests", "users", ["creator_id"], ["id"], ondelete="CASCADE")
     op.create_foreign_key("fk_payout_requests_decided_by", "payout_requests", "users", ["decided_by"], ["id"])
     op.create_foreign_key("fk_ad_impressions_user_id", "ad_impressions", "users", ["user_id"], ["id"], ondelete="CASCADE")
-    op.create_foreign_key("fk_vip_entitlements_user_id", "vip_entitlements", "users", ["user_id"], ondelete="CASCADE")
+    op.create_foreign_key("fk_vip_entitlements_user_id", "vip_entitlements", "users", ["user_id"], ["id"], ondelete="CASCADE")
     op.create_foreign_key("fk_moderation_items_submitter_id", "moderation_items", "users", ["submitter_id"], ["id"])
     op.create_foreign_key("fk_moderation_items_decided_by", "moderation_items", "users", ["decided_by"], ["id"])
     op.create_foreign_key("fk_audit_log_actor_id", "audit_log", "users", ["actor_id"], ["id"])

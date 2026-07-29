@@ -26,6 +26,7 @@ class User(Base):
     language: Mapped[str] = mapped_column(String(10), nullable=False, default="en")
     age_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     onboarded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     banned_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     ban_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     deleted_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)

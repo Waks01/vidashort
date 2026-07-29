@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from app.core.pydantic_base import BaseSchema
 
 
-class CreatorProfileResponse(BaseModel):
+class CreatorProfileResponse(BaseSchema):
     id: str
     user_id: str
     name: str
@@ -18,7 +18,7 @@ class CreatorProfileResponse(BaseModel):
     created_at: str
 
 
-class CreatorProfileRequest(BaseModel):
+class CreatorProfileRequest(BaseSchema):
     name: str | None = None
     bio: str | None = None
     niche: str | None = None
@@ -26,7 +26,7 @@ class CreatorProfileRequest(BaseModel):
     payout_account: str | None = None
 
 
-class CreatorSeriesItem(BaseModel):
+class CreatorSeriesItem(BaseSchema):
     id: str
     slug: str
     title: str
@@ -42,11 +42,11 @@ class CreatorSeriesItem(BaseModel):
     created_at: str
 
 
-class CreatorSeriesResponse(BaseModel):
+class CreatorSeriesResponse(BaseSchema):
     items: list[CreatorSeriesItem]
 
 
-class CreatorSeriesCreateRequest(BaseModel):
+class CreatorSeriesCreateRequest(BaseSchema):
     title: str
     synopsis: str
     category: str
@@ -55,38 +55,38 @@ class CreatorSeriesCreateRequest(BaseModel):
     total_episodes: int
 
 
-class UploadUrlItem(BaseModel):
+class UploadUrlItem(BaseSchema):
     episode_number: int
     video_upload_url: str | None = None
     cover_upload_url: str | None = None
 
 
-class CreatorSeriesCreateResponse(BaseModel):
+class CreatorSeriesCreateResponse(BaseSchema):
     series: CreatorSeriesItem
     upload_urls: list[UploadUrlItem]
 
 
-class CreatorAnalyticsResponse(BaseModel):
+class CreatorAnalyticsResponse(BaseSchema):
     totals: dict
     daily: list[dict]
     by_series: list[dict]
 
 
-class CreatorEarningsResponse(BaseModel):
+class CreatorEarningsResponse(BaseSchema):
     lifetime: dict
     pending: dict
     transactions: list[dict]
 
 
-class PayoutRequest(BaseModel):
+class PayoutRequest(BaseSchema):
     amount_coins: int
 
 
-class PayoutResponse(BaseModel):
+class PayoutResponse(BaseSchema):
     payout: dict
 
 
-class PayoutItem(BaseModel):
+class PayoutItem(BaseSchema):
     id: str
     amount_coins: int
     amount_naira: float
@@ -99,5 +99,5 @@ class PayoutItem(BaseModel):
     note: str | None = None
 
 
-class PayoutListResponse(BaseModel):
+class PayoutListResponse(BaseSchema):
     items: list[PayoutItem]

@@ -1,21 +1,22 @@
-from pydantic import BaseModel
+from app.core.pydantic_base import BaseSchema
 
 
-class CheckRequest(BaseModel):
+class CheckRequest(BaseSchema):
     episode_id: str
 
 
-class CheckResponse(BaseModel):
+class CheckResponse(BaseSchema):
     allowed: bool
     source: str | None = None
+    paywall: dict | None = None
 
 
-class UnlockRequest(BaseModel):
+class UnlockRequest(BaseSchema):
     episode_id: str
     source: str
 
 
-class UnlockResponse(BaseModel):
+class UnlockResponse(BaseSchema):
     ok: bool
     source: str
     coins_after: int | None = None

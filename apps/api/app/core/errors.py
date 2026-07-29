@@ -3,6 +3,12 @@ class AppError(Exception):
     code: str = "bad_request"
     detail: str = "Bad request"
 
+    def __init__(self, *, status_code: int | None = None, code: str | None = None, detail: str | None = None):
+        self.status_code = status_code if status_code is not None else type(self).status_code
+        self.code = code if code is not None else type(self).code
+        self.detail = detail if detail is not None else type(self).detail
+        super().__init__(self.detail)
+
 
 class NotFound(AppError):
     status_code = 404

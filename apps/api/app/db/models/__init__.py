@@ -1,6 +1,7 @@
 from app.db.base import Base
 from app.db.models.content import Episode, Series
 from app.db.models.economy import AdImpression, CoinTxn, CreatorEarning, PayoutRequest
+from app.db.models.email_otp import EmailOtp
 from app.db.models.engagement import Comment, Favorite, WatchHistory
 from app.db.models.identity import UserIdentity
 from app.db.models.moderation import AuditLog, ModerationItem
@@ -15,6 +16,7 @@ __all__ = [
     "UserIdentity",
     "RefreshToken",
     "PasswordReset",
+    "EmailOtp",
     "Series",
     "Episode",
     "WatchHistory",
