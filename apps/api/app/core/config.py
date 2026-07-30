@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     cors_origins: str = "*"
     cf_account_id: str = ""
     cf_stream_signing_key: str = ""
+    cf_stream_key_id: str = ""
+    cf_webhook_secret: str = ""
     cf_r2_bucket: str = ""
     apple_bundle_id: str = ""
     apple_key_id: str = ""

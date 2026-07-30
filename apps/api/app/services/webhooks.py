@@ -33,8 +33,30 @@ from app.db.models import (
 
 
 def verify_signature(secret: str, body: bytes, header: str) -> bool:
-    """Constant-time HMAC-SHA256 compare. Returns False if either side is empty."""
+    """Constant-time HMAC-SHA256 compare.
+
+    Supports two forms:
+    - raw hex digest (legacy / internal webhooks)
+    - `key=value,...` formats like Cloudflare's
+        `Webhook-Signature: time=<ts>,sig1=<hex>`
+    Returns False if either side is empty.
+    """
     if not secret or not header:
+        return False
+    try:
+        if "=" in header and "," in header:
+            parts = dict(p.split("=", 1) for p in header.split(",") if "=" in p)
+            ts = parts.get("time") or parts.get("t")
+            sig = parts.get("sig1") or parts.get("v1")
+            if not ts or not sig:
+                return False
+            expected = hmac.new(
+                f"{ts}.".encode() + body,
+                secret.encode(),
+                hashlib.sha256,
+            ).hexdigest()
+            return hmac.compare_digest(expected, sig)
+    except Exception:
         return False
     expected = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, header)

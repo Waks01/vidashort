@@ -55,7 +55,7 @@ async def test_cloudflare_webhook_marks_episode_ready(client, db_session):
 
     payload = {"uid": "cloudflare-uid-XYZ"}
     body = json.dumps(payload).encode()
-    sig = _sign(settings.cf_stream_signing_key, body)
+    sig = _sign(settings.cf_webhook_secret, body)
 
     resp = await client.post(
         "/v1/webhooks/cloudflare",

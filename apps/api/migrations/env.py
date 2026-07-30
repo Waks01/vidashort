@@ -1,7 +1,17 @@
 from logging.config import fileConfig
 import os
+from pathlib import Path
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+
+env_path = Path(__file__).resolve().parents[1] / ".env"
+if env_path.exists():
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip())
 
 config = context.config
 if config.config_file_name is not None:

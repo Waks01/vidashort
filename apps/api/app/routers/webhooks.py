@@ -28,7 +28,7 @@ async def cloudflare_webhook(
     db: AsyncSession = Depends(get_db),
 ):
     body = await request.body()
-    if not webhook_service.verify_signature(settings.cf_stream_signing_key, body, request.headers.get("X-Vidashort-Signature", "")):
+    if not webhook_service.verify_signature(settings.cf_webhook_secret, body, request.headers.get("X-Vidashort-Signature", "")):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid signature")
     if await _webhook_idempotency("cloudflare", body):
         return {"ok": True, "duplicate": True}
