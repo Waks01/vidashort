@@ -67,3 +67,30 @@ async def delete_me(db: AsyncSession, user_id: str):
     user.name = "Deleted user"
     user.avatar_url = None
     await db.commit()
+
+
+async def watch_history(db: AsyncSession, user_id: str) -> list[dict]:
+    from app.db.models import WatchHistory as WatchHistoryModel
+    result = await db.execute(
+        select(WatchHistoryModel).where(WatchHistoryModel.user_id == user_id).order_by(WatchHistoryModel.watched_at.desc()).limit(50)
+    )
+    items = []
+    for h in result.scalars().all():
+        items.append({
+            "id": str(h.id),
+            "seriesId": str(h.episode.series_id) if h.episode else None,
+            "episodeId": str(h.episode_id),
+            "position_s": h.position_s,
+            "completed": h.completed,
+            "watchedAt": h.watched_at.isoformat() if h.watched_at else None,
+        })
+    return items
+
+
+async def favorites(db: AsyncSession, user_id: str) -> dict:
+    from app.db.models import Favorite as FavoriteModel
+    result = await db.execute(
+        select(FavoriteModel).where(FavoriteModel.user_id == user_id).order_by(FavoriteModel.created_at.desc())
+    )
+    items = [{"seriesId": str(f.series_id), "createdAt": f.created_at.isoformat() if f.created_at else None} for f in result.scalars().all()]
+    return {"items": items}

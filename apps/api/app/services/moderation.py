@@ -1,48 +1,61 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime
+from app.db.models import Series, ModerationItem
 
-from app.db.models import ModerationItem
-
-
-async def enqueue_series(db: AsyncSession, series_id: str, reason: str, auto_flagged: bool = False):
-    item = ModerationItem(
-        id=str(__import__("uuid").uuid4()),
-        kind="series",
-        ref_id=series_id,
-        reason=reason,
-        auto_flagged=auto_flagged,
-    )
-    db.add(item)
-    await db.commit()
+NSFW_KEYWORDS = ["nsfw", "xxx", "porn", "nude", "explicit"]
+VIOLENCE_KEYWORDS = ["kill", "murder", "blood", "torture", "rape"]
+HATE_KEYWORDS = ["hate", "racist", "bigot", "slur"]
 
 
-async def enqueue_comment(db: AsyncSession, comment_id: str, reason: str, auto_flagged: bool = False):
-    item = ModerationItem(
-        id=str(__import__("uuid").uuid4()),
-        kind="comment",
-        ref_id=comment_id,
-        reason=reason,
-        auto_flagged=auto_flagged,
-    )
-    db.add(item)
-    await db.commit()
+def _auto_flag_score(text: str) -> tuple[float, list[str]]:
+    lower = text.lower()
+    hits = []
+    for kw in NSFW_KEYWORDS:
+        if kw in lower:
+            hits.append(kw)
+    for kw in VIOLENCE_KEYWORDS:
+        if kw in lower:
+            hits.append(kw)
+    for kw in HATE_KEYWORDS:
+        if kw in lower:
+            hits.append(kw)
+    score = min(1.0, len(hits) * 0.3)
+    return score, hits
 
 
-async def enqueue_account(db: AsyncSession, user_id: str, reason: str, auto_flagged: bool = False):
-    item = ModerationItem(
-        id=str(__import__("uuid").uuid4()),
-        kind="account",
-        ref_id=user_id,
-        reason=reason,
-        auto_flagged=auto_flagged,
-    )
-    db.add(item)
-    await db.commit()
+async def auto_flag_series(db: AsyncSession, series: Series) -> None:
+    text = f"{series.title} {series.synopsis}"
+    score, hits = _auto_flag_score(text)
+    if score >= 0.6:
+        existing = await db.execute(select(ModerationItem).where(ModerationItem.ref_id == str(series.id), ModerationItem.kind == "series"))
+        if existing.scalar_one_or_none():
+            return
+        db.add(ModerationItem(
+            id=str(__import__("uuid").uuid4()),
+            kind="series",
+            ref_id=str(series.id),
+            submitter_id=None,
+            reason=f"Auto-flagged keywords: {', '.join(hits)}",
+            status="pending",
+            auto_flagged=True,
+        ))
+        await db.commit()
 
 
-async def pending_queue(db: AsyncSession, kind: str | None = None) -> list[ModerationItem]:
-    query = select(ModerationItem).where(ModerationItem.status == "pending")
-    if kind:
-        query = query.where(ModerationItem.kind == kind)
-    result = await db.execute(query.order_by(ModerationItem.created_at.desc()))
-    return result.scalars().all()
+async def auto_flag_comment(db: AsyncSession, comment_id: str, body: str) -> None:
+    score, hits = _auto_flag_score(body)
+    if score >= 0.6:
+        existing = await db.execute(select(ModerationItem).where(ModerationItem.ref_id == comment_id, ModerationItem.kind == "comment"))
+        if existing.scalar_one_or_none():
+            return
+        db.add(ModerationItem(
+            id=str(__import__("uuid").uuid4()),
+            kind="comment",
+            ref_id=comment_id,
+            submitter_id=None,
+            reason=f"Auto-flagged keywords: {', '.join(hits)}",
+            status="pending",
+            auto_flagged=True,
+        ))
+        await db.commit()

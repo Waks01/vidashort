@@ -47,3 +47,15 @@ class UpdateMeRequest(BaseSchema):
 
 class AgeConfirmRequest(BaseSchema):
     confirmed: bool
+
+
+class WatchHistoryItem(BaseSchema):
+    id: str
+    episodeId: str
+    position_s: int
+    completed: bool
+    watchedAt: str
+
+
+class FavoritesResponse(BaseSchema):
+    items: list[dict]

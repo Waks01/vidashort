@@ -1,8 +1,8 @@
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from app.db.models import User, Series, ModerationItem, PayoutRequest, CoinTxn, AuditLog
+from app.db.models import User, Series, ModerationItem, PayoutRequest, CoinTxn, AuditLog, VipEntitlement, AdImpression, CreatorEarning
 from app.schemas.admin import (
     AdminAdCampaignItem,
     AdminFinanceResponse,
@@ -15,29 +15,111 @@ from app.schemas.admin import (
 
 
 async def overview(db: AsyncSession, range: str) -> AdminOverviewResponse:
+    now = datetime.utcnow()
+    if range == "24h":
+        since = now - timedelta(hours=24)
+    elif range == "7d":
+        since = now - timedelta(days=7)
+    else:
+        since = now - timedelta(days=30)
+    
+    new_signups = (await db.execute(
+        select(func.count()).select_from(User).where(User.created_at >= since)
+    )).scalar_one()
+    
+    dau = (await db.execute(
+        select(func.count()).select_from(User).where(User.created_at >= now - timedelta(hours=24))
+    )).scalar_one()
+    
+    mau = (await db.execute(
+        select(func.count()).select_from(User).where(User.created_at >= now - timedelta(days=30))
+    )).scalar_one()
+    
+    paying = (await db.execute(
+        select(func.count()).select_from(User).where(User.coins > 0)
+    )).scalar_one()
+    
+    active_vip = (await db.execute(
+        select(func.count()).select_from(VipEntitlement).where(VipEntitlement.expires_at > now)
+    )).scalar_one()
+    
+    from app.services.ad_cap import DAILY_AD_CAP
+    caps_result = await db.execute(
+        select(func.count()).select_from(AdImpression)
+        .where(AdImpression.created_at >= now.date())
+        .group_by(AdImpression.user_id)
+        .having(func.count() >= DAILY_AD_CAP)
+    )
+    caps = caps_result.scalar_one_or_none() or 0
+    
+    mod_queue = (await db.execute(
+        select(func.count()).select_from(ModerationItem).where(ModerationItem.status == "pending")
+    )).scalar_one()
+    
+    pending_result = await db.execute(
+        select(func.sum(PayoutRequest.amount_coins)).where(PayoutRequest.status == "pending")
+    )
+    pending_coins = pending_result.scalar_one() or 0
+    
+    revenue_result = await db.execute(
+        select(func.sum(CoinTxn.delta)).where(CoinTxn.reason == "purchase", CoinTxn.created_at >= since)
+    )
+    gross_coins = max(0, revenue_result.scalar_one() or 0)
+    gross_naira = gross_coins / 10
+    
+    earnings_result = await db.execute(select(func.sum(CreatorEarning.creator_coins)))
+    total_liability = earnings_result.scalar_one() or 0
+    
     return AdminOverviewResponse(
-        gmv_naira=0.0,
-        net_revenue_naira=0.0,
-        dau=0,
-        mau=0,
-        new_signups=0,
-        paying_users=0,
-        active_vip=0,
-        ad_cap_hits=0,
-        moderation_queue_size=0,
-        pending_payouts_naira=0.0,
+        gmv_naira=gross_naira,
+        net_revenue_naira=gross_naira - (total_liability / 10),
+        dau=dau,
+        mau=mau,
+        new_signups=new_signups,
+        paying_users=paying,
+        active_vip=active_vip,
+        ad_cap_hits=caps,
+        moderation_queue_size=mod_queue,
+        pending_payouts_naira=pending_coins / 10,
         top_series=[],
     )
 
 
 async def moderation(db: AsyncSession, kind, status, cursor, limit) -> AdminModerationResponse:
-    return AdminModerationResponse(items=[], next_cursor=None)
+    from app.db.models import Series as SeriesModel
+    stmt = select(ModerationItem)
+    if kind:
+        stmt = stmt.where(ModerationItem.kind == kind)
+    if status:
+        stmt = stmt.where(ModerationItem.status == status)
+    stmt = stmt.order_by(ModerationItem.created_at.desc()).limit(limit)
+    items_result = await db.execute(stmt)
+    items_list = []
+    for item in items_result.scalars().all():
+        title = None
+        submitted_by = None
+        if item.submitter_id:
+            user = await db.get(User, str(item.submitter_id))
+            if user:
+                submitted_by = user.name
+        if item.kind == "series":
+            series = await db.get(SeriesModel, str(item.ref_id))
+            if series:
+                title = series.title
+        items_list.append(AdminModerationItem(
+            id=str(item.id),
+            kind=item.kind,
+            ref_id=str(item.ref_id),
+            title=title,
+            submitted_by=submitted_by,
+            submitted_at=item.created_at.isoformat() if item.created_at else None,
+            reason=item.reason or "",
+            preview=None,
+        ))
+    return AdminModerationResponse(items=items_list, next_cursor=None)
 
 
 async def content_list(db: AsyncSession, cursor, source, q, category, moderation_status) -> dict:
-    """Paginated admin view of all Series. Filters: source (original|tmdb|creator),
-    category, moderation_status. `q` matches title LIKE %q%. Cursor is the
-    last id from the previous page; for now we slice on Series.id."""
     from app.db.models import Series as SeriesModel
     stmt = select(SeriesModel)
     if source:
@@ -72,12 +154,6 @@ async def content_list(db: AsyncSession, cursor, source, q, category, moderation
 
 
 async def moderation_decide(db: AsyncSession, actor_id: str, id: str, payload) -> dict:
-    """Approve or reject a moderation item. On approve:
-      - Series items → series.is_published=True, series.moderation_status='approved'
-      - Comment items → noop (handled by the comment service)
-      - Account items → user.banned/unbanned per decision
-    Every decision appends an AuditLog row so we have a full audit trail of who
-    decided what."""
     from app.core.errors import AppError
     decision = payload.decision
     if decision not in ("approve", "reject"):
@@ -109,13 +185,16 @@ async def moderation_decide(db: AsyncSession, actor_id: str, id: str, payload) -
         after=__import__("json").dumps({"note": payload.note or ""}),
     ))
     await db.commit()
+    if item.submitter_id:
+        try:
+            from app.services import notifications as notif_svc
+            await notif_svc.queue_payout_decision(db, str(item.submitter_id), id, decision)
+        except Exception:
+            pass
     return {"ok": True, "status": item.status}
 
 
 async def content_update(db: AsyncSession, actor_id: str, id: str, payload: dict) -> dict:
-    """Admin override on a Series row: set category, is_vip_only, is_published,
-    copyright_owner. Everything in `payload` is treated as opt-in (missing
-    keys are no-ops). All changes are audit-logged with before/after."""
     from app.core.errors import AppError
     series = await db.get(Series, id)
     if not series:
@@ -131,7 +210,6 @@ async def content_update(db: AsyncSession, actor_id: str, id: str, payload: dict
         series.title = payload["title"]
     if "category" in payload:
         series.category = payload["category"]
-    # Accept either snake_case (Python convention) or camelCase (wire format).
     is_published = payload.get("is_published", payload.get("isPublished"))
     if is_published is not None:
         series.is_published = bool(is_published)
@@ -154,8 +232,6 @@ async def content_update(db: AsyncSession, actor_id: str, id: str, payload: dict
 
 
 async def content_feature(db: AsyncSession, actor_id: str, id: str, payload: dict) -> dict:
-    """Pin a series to the home/featured rail. `featured_until` is an ISO
-    timestamp; rows past it are auto-excluded by the content router."""
     from app.core.errors import AppError
     from datetime import datetime as _dt
     series = await db.get(Series, id)
@@ -180,7 +256,36 @@ async def content_feature(db: AsyncSession, actor_id: str, id: str, payload: dic
 
 
 async def user_list(db: AsyncSession, cursor, role, q, banned) -> dict:
-    return {"items": [], "next_cursor": None}
+    from app.db.models import User as UserModel
+    stmt = select(UserModel)
+    if role:
+        stmt = stmt.where(UserModel.role == role)
+    if q:
+        stmt = stmt.where(UserModel.name.ilike(f"%{q}%") | UserModel.email.ilike(f"%{q}%"))
+    if banned is not None:
+        if banned:
+            stmt = stmt.where(UserModel.banned_at.isnot(None))
+        else:
+            stmt = stmt.where(UserModel.banned_at.is_(None))
+    if cursor:
+        stmt = stmt.where(UserModel.id > cursor)
+    stmt = stmt.order_by(UserModel.id).limit(50)
+    rows = (await db.execute(stmt)).scalars().all()
+    next_cursor = rows[-1].id if len(rows) == 50 else None
+    return {
+        "items": [
+            {
+                "id": str(u.id),
+                "email": u.email,
+                "name": u.name,
+                "role": u.role,
+                "coins": u.coins,
+                "bannedAt": u.banned_at.isoformat() if u.banned_at else None,
+            }
+            for u in rows
+        ],
+        "next_cursor": next_cursor,
+    }
 
 
 async def user_detail(db: AsyncSession, id: str) -> dict:
@@ -192,9 +297,6 @@ async def user_detail(db: AsyncSession, id: str) -> dict:
 
 
 async def user_update(db: AsyncSession, actor_id: str, id: str, payload) -> dict:
-    """Admin edit on a User row: change role, ban/unban, optional coin refund
-    (writes a CoinTxn with reason='admin_refund' for traceability). Bans are
-    append-only via `banned_at` + `ban_reason`."""
     from app.core.errors import AppError
     from datetime import datetime as _dt
     user = await db.get(User, id)
@@ -238,9 +340,6 @@ async def user_update(db: AsyncSession, actor_id: str, id: str, payload) -> dict
 
 
 async def ad_campaign_update(db: AsyncSession, actor_id: str, id: str, payload: dict) -> dict:
-    """Admin update on an ad campaign. Phase 2 reads campaign config from a
-    static table; Phase 3 will move it to Redis for hot-reload. For now we
-    no-op with an audit row — the real config table doesn't exist yet."""
     from app.core.errors import AppError
     db.add(AuditLog(
         id=str(__import__("uuid").uuid4()),
@@ -255,10 +354,6 @@ async def ad_campaign_update(db: AsyncSession, actor_id: str, id: str, payload: 
 
 
 async def payout_decide(db: AsyncSession, actor_id: str, id: str, payload) -> dict:
-    """Approve or reject a creator payout request. Approved payouts move to
-    status='approved' (the actual money transfer happens out-of-band via
-    OPay/PalmPay/Moniepoint/Bank APIs in Phase 3); rejected ones move to
-    'rejected' with a note."""
     from app.core.errors import AppError
     decision = payload.decision
     if decision not in ("approve", "reject"):
@@ -281,6 +376,11 @@ async def payout_decide(db: AsyncSession, actor_id: str, id: str, payload) -> di
         after=__import__("json").dumps({"note": payload.note or ""}),
     ))
     await db.commit()
+    try:
+        from app.services import notifications as notif_svc
+        await notif_svc.queue_payout_decision(db, str(payout.user_id), id, decision)
+    except Exception:
+        pass
     return {"ok": True, "status": payout.status}
 
 
@@ -289,10 +389,46 @@ async def ad_campaigns(db: AsyncSession) -> list[AdminAdCampaignItem]:
 
 
 async def finance(db: AsyncSession, range: str) -> AdminFinanceResponse:
+    from datetime import timedelta
+    
+    now = datetime.utcnow()
+    since = now - timedelta(days=30)
+    if range == "7d":
+        since = now - timedelta(days=7)
+    elif range == "24h":
+        since = now - timedelta(hours=24)
+    
+    sales_result = await db.execute(
+        select(func.sum(CoinTxn.delta)).where(CoinTxn.reason == "purchase", CoinTxn.created_at >= since)
+    )
+    gross_coins = max(0, sales_result.scalar_one() or 0)
+    
+    earnings_result = await db.execute(
+        select(func.sum(CreatorEarning.creator_coins)).where(CreatorEarning.created_at >= since)
+    )
+    creator_liability_coins = earnings_result.scalar_one() or 0
+    
+    gross_naira = gross_coins / 10
+    creator_liability_naira = creator_liability_coins / 10
+    
+    ledger = []
+    recent_txns = (await db.execute(
+        select(CoinTxn).where(CoinTxn.created_at >= since).order_by(CoinTxn.created_at.desc()).limit(50)
+    )).scalars().all()
+    for t in recent_txns:
+        ledger.append({
+            "id": str(t.id),
+            "type": t.reason,
+            "delta": t.delta,
+            "userId": str(t.user_id),
+            "refId": str(t.ref_id) if t.ref_id else None,
+            "createdAt": t.created_at.isoformat() if t.created_at else None,
+        })
+    
     return AdminFinanceResponse(
-        net_revenue_naira=0.0,
-        gross_coin_sales_naira=0.0,
-        creator_liability_naira=0.0,
-        platform_net_naira=0.0,
-        ledger=[],
+        net_revenue_naira=gross_naira - creator_liability_naira,
+        gross_coin_sales_naira=gross_naira,
+        creator_liability_naira=creator_liability_naira,
+        platform_net_naira=gross_naira - creator_liability_naira,
+        ledger=ledger,
     )

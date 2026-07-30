@@ -78,3 +78,26 @@ class FeaturedItem(BaseSchema):
 
 class FeaturedResponse(BaseSchema):
     items: list[FeaturedItem]
+
+
+class CommentItem(BaseSchema):
+    id: str
+    user: dict
+    body: str
+    likes: int
+    liked: bool
+    replies: list[dict]
+    createdAt: str
+
+
+class CommentListResponse(BaseSchema):
+    items: list[CommentItem]
+    next_cursor: str | None = None
+
+
+class CommentCreateRequest(BaseSchema):
+    body: str
+
+
+class CommentLikeResponse(BaseSchema):
+    likes: int

@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_creator
+from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.schemas.creator import (
     CreatorAnalyticsResponse,
@@ -103,9 +104,11 @@ async def earnings(
 @router.post("/payouts", response_model=PayoutResponse, status_code=status.HTTP_201_CREATED)
 async def request_payout(
     payload: PayoutRequest,
+    request: Request,
     user: dict = Depends(get_creator),
     db: AsyncSession = Depends(get_db),
 ):
+    await rate_limit(user.get("id"), request.client.host if request.client else "0.0.0.0", "creator:payouts", limit=5, window_s=86400)
     return await creator_service.request_payout(db, user["id"], payload)
 
 

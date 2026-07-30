@@ -61,7 +61,7 @@ async def test_packs_returns_five_tier_catalog(client):
 
 
 @pytest.mark.asyncio
-async def test_purchase_returns_501_until_receipt_validation_wired(client):
+async def test_purchase_returns_400_for_invalid_apple_receipt(client):
     user_id, _ = await _signup(client, "purchaser@example.com")
     # The schema enforces a structured receipt payload, not a raw string.
     resp = await client.post("/v1/coins/purchase", json={
@@ -72,10 +72,10 @@ async def test_purchase_returns_501_until_receipt_validation_wired(client):
             "txnId": "txn-123",
         },
     }, headers=auth_headers(user_id))
-    # Phase-2 reality: receipt verification is a stub — accept any of:
-    # 501 (not implemented) OR 200 (lab mock in tests/dev). The endpoint
-    # shouldn't 401/422 on a valid auth + payload.
-    assert resp.status_code in (200, 501), resp.text
+    # Phase-3 reality: real Apple verification rejects fake receipts with 400.
+    assert resp.status_code == 400, resp.text
+    body = resp.json()
+    assert body["error"] == "invalid_receipt"
 
 
 @pytest.mark.asyncio

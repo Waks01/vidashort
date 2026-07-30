@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     apple_key_id: str = ""
     apple_team_id: str = ""
     apple_private_key: str = ""
+    apple_shared_secret: str = ""
     google_service_account_json: str = ""
     revenuecat_webhook_secret: str = ""
     revenuecat_api_key: str = ""
@@ -31,6 +32,8 @@ class Settings(BaseSettings):
     paystack_webhook_secret: str = ""
     paystack_public_key: str = ""
     sentry_dsn: str | None = None
+    posthog_api_key: str | None = None
+    posthog_host: str | None = None
     app_api_base_url: str = "http://localhost:8000"
     secret_key: str = ""
     access_token_expire_minutes: int = 30
@@ -39,6 +42,11 @@ class Settings(BaseSettings):
     otp_ttl_seconds: int = 600
     resend_api_key: str = ""
     resend_email_from: str = ""
+    fcm_server_key: str = ""
+    apns_key_id: str = ""
+    apns_team_id: str = ""
+    apns_auth_token: str = ""
+    apns_topic: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:

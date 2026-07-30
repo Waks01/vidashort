@@ -101,16 +101,28 @@ async def _activate_vip(db: AsyncSession, user: User, *, source: str, product_id
     analytics and refund lookup.
     """
     expires_at = datetime.utcnow() + _vip_duration_from_product(product_id)
-    row = VipEntitlement(
-        id=str(uuid.uuid4()),
-        user_id=user.id,
-        source=source,
-        product_id=product_id,
-        started_at=datetime.utcnow(),
-        expires_at=expires_at,
-        auto_renew=True,
-    )
-    db.add(row)
+    existing = (await db.execute(
+        select(VipEntitlement).where(
+            VipEntitlement.user_id == user.id,
+            VipEntitlement.source == source,
+            VipEntitlement.product_id == product_id,
+            VipEntitlement.expires_at > datetime.utcnow(),
+        )
+    )).scalar_one_or_none()
+    if existing:
+        existing.expires_at = expires_at
+        existing.updated_at = datetime.utcnow()
+    else:
+        row = VipEntitlement(
+            id=str(uuid.uuid4()),
+            user_id=user.id,
+            source=source,
+            product_id=product_id,
+            started_at=datetime.utcnow(),
+            expires_at=expires_at,
+            auto_renew=True,
+        )
+        db.add(row)
     db.add(AuditLog(
         id=str(uuid.uuid4()),
         actor_id=user.id,
@@ -163,18 +175,25 @@ async def handle_apple(db: AsyncSession, payload: dict) -> None:
     """
     notification_type = payload.get("notificationType", "")
     if notification_type in ("SUBSCRIBED", "DID_RENEW"):
-        await _activate_vip(db, user=_user_from_apple_payload(payload), source="apple", product_id=payload.get("productId", "apple-sub"))
+        user = await _user_from_apple_payload(db, payload)
+        if user:
+            await _activate_vip(db, user, source="apple", product_id=payload.get("productId", "apple-sub"))
     elif notification_type in ("EXPIRED", "DID_FAIL_TO_RENEW", "REFUND"):
-        user = _user_from_apple_payload(payload)
+        user = await _user_from_apple_payload(db, payload)
         if user:
             await _deactivate_vip(db, user)
 
 
-def _user_from_apple_payload(payload: dict) -> User | None:
-    """Best-effort user lookup. Apple only sends a notification UUID + the
-    signed transaction; the user_id lives in our DB keyed by original_txn_id.
-    Phase 3: index VipEntitlement.original_txn_id and look up by that."""
-    return None
+async def _user_from_apple_payload(db: AsyncSession, payload: dict) -> User | None:
+    """Look up user by original_txn_id in our VIP entitlements."""
+    original_txn_id = payload.get("originalTransactionId") or payload.get("original_transaction_id")
+    if not original_txn_id:
+        return None
+    result = await db.execute(select(VipEntitlement).where(VipEntitlement.original_txn_id == original_txn_id))
+    vip = result.scalar_one_or_none()
+    if not vip:
+        return None
+    return await db.get(User, vip.user_id)
 
 
 # ---------- Google Play Real-time Developer Notifications ----------
@@ -193,23 +212,19 @@ async def handle_google(db: AsyncSession, payload: dict) -> None:
         decoded = payload
     notification = decoded.get("subscriptionNotification", {}) or {}
     n_type = notification.get("notificationType", 0)
+    purchase_token = notification.get("purchaseToken", "")
+    
     if n_type in (1, 2, 4, 7):  # RECOVERED, RENEWED, PENDING_PURCHASE_CANCELED->NO, ACCOUNT_HOLD
-        # No clean user lookup without a server-side purchase token correlation;
-        # for Phase 2 we leave this as a no-op + audit row.
-        db.add(AuditLog(
-            id=str(uuid.uuid4()),
-            actor_id="google",
-            action="vip_activate_or_hold",
-            target_kind="subscription",
-            target_id=str(notification.get("purchaseToken", "")),
-        ))
-        await db.commit()
+        result = await db.execute(select(VipEntitlement).where(VipEntitlement.original_txn_id == purchase_token))
+        vip = result.scalar_one_or_none()
+        if vip:
+            user = await db.get(User, vip.user_id)
+            if user:
+                await _activate_vip(db, user, source="google", product_id=notification.get("sku", "unknown"))
     elif n_type in (12, 13):  # REVOKED, EXPIRED
-        db.add(AuditLog(
-            id=str(uuid.uuid4()),
-            actor_id="google",
-            action="vip_deactivate",
-            target_kind="subscription",
-            target_id=str(notification.get("purchaseToken", "")),
-        ))
-        await db.commit()
+        result = await db.execute(select(VipEntitlement).where(VipEntitlement.original_txn_id == purchase_token))
+        vip = result.scalar_one_or_none()
+        if vip:
+            user = await db.get(User, vip.user_id)
+            if user:
+                await _deactivate_vip(db, user)

@@ -44,8 +44,11 @@ async def test_admin_overview_returns_zero_stats_for_fresh_db(client, db_session
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["gmvNaira"] == 0.0
-    assert body["dau"] == 0
     assert body["moderationQueueSize"] == 0
+    # Fresh DB has exactly one user (the admin who just signed up).
+    assert body["dau"] == 1
+    assert body["mau"] == 1
+    assert body["newSignups"] == 1
 
 
 @pytest.mark.asyncio

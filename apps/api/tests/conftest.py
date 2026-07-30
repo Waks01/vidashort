@@ -27,6 +27,9 @@ os.environ.setdefault("GOOGLE_SERVICE_ACCOUNT_JSON", "test-google-key")
 # (logs the OTP / deep link). The test capture hooks below still observe calls.
 os.environ.setdefault("RESEND_API_KEY", "")
 os.environ.setdefault("RESEND_EMAIL_FROM", "test@vidashort.app")
+os.environ.setdefault("SENTRY_DSN", "")
+os.environ.setdefault("POSTHOG_API_KEY", "")
+os.environ.setdefault("POSTHOG_HOST", "")
 
 import pytest
 import pytest_asyncio
@@ -107,11 +110,61 @@ class _FakeRedis:
         self.store[key] = (v, seconds)
         return True
 
+    async def set(self, key: str, value: str, ex: int | None = None) -> bool:
+        self.store[key] = (value, ex)
+        return True
+
+    async def exists(self, key: str) -> int:
+        return 1 if key in self.store else 0
+
     async def delete(self, *keys: str) -> int:
         removed = 0
         for k in keys:
             if k in self.store:
                 del self.store[k]
+                removed += 1
+        return removed
+
+    async def zremrangebyscore(self, key: str, min_score: float, max_score: float) -> int:
+        if key not in self.store:
+            return 0
+        v, _ = self.store[key]
+        if not isinstance(v, dict):
+            return 0
+        to_remove = [m for m, s in v.items() if s < min_score or s > max_score]
+        for m in to_remove:
+            del v[m]
+        return len(to_remove)
+
+    async def zcard(self, key: str) -> int:
+        if key not in self.store:
+            return 0
+        v, _ = self.store[key]
+        if isinstance(v, dict):
+            return len(v)
+        return 1
+
+    async def zadd(self, key: str, mapping: dict[str, float]) -> int:
+        if key not in self.store:
+            self.store[key] = ({}, None)
+        v, _ = self.store[key]
+        if not isinstance(v, dict):
+            v = {}
+            self.store[key] = (v, self.store[key][1])
+        for member, score in mapping.items():
+            v[member] = score
+        return len(mapping)
+
+    async def zrem(self, key: str, *members: str) -> int:
+        if key not in self.store:
+            return 0
+        v, _ = self.store[key]
+        if not isinstance(v, dict):
+            return 0
+        removed = 0
+        for m in members:
+            if m in v:
+                del v[m]
                 removed += 1
         return removed
 
@@ -134,11 +187,17 @@ def fake_redis(monkeypatch) -> _FakeRedis:
     fake = _FakeRedis()
     import app.core.deps as deps_module
     import app.main as main_module
+    import app.routers.webhooks as webhooks_module
+    import app.services.ad_cap as ad_cap_module
     import app.services.auth as auth_service_module
+    import app.core.rate_limit as rate_limit_module
     monkeypatch.setattr(session_module, "get_redis", lambda: fake)
     monkeypatch.setattr(deps_module, "get_redis", lambda: fake)
     monkeypatch.setattr(main_module, "get_redis", lambda: fake)
+    monkeypatch.setattr(ad_cap_module, "get_redis", lambda: fake)
+    monkeypatch.setattr(webhooks_module, "get_redis", lambda: fake)
     monkeypatch.setattr(auth_service_module, "get_redis", lambda: fake)
+    monkeypatch.setattr(rate_limit_module, "get_redis", lambda: fake)
     yield fake
     fake.reset()
 

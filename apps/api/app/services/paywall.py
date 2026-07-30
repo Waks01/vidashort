@@ -26,8 +26,6 @@ from app.services import ad_cap
 from app.services.revenue_split import (
     EPISODE_UNLOCK_COST,
     REWARDED_AD_REWARD,
-    compute_creator_coins,
-    compute_platform_coins,
 )
 
 
@@ -115,19 +113,7 @@ async def pay_with_coins(db: AsyncSession, user_id: str, episode_id: str) -> dic
     db.add(txn)
     creator_coins = 0
     if series and series.creator_id and series.creator_id != user.id:
-        creator = await db.get(User, series.creator_id)
-        if creator:
-            creator_coins = compute_creator_coins(EPISODE_UNLOCK_COST)
-            creator.loyalty_coins += creator_coins
-            earning = CreatorEarning(
-                id=str(uuid.uuid4()),
-                creator_id=creator.id,
-                episode_id=episode.id,
-                gross_coins=EPISODE_UNLOCK_COST,
-                creator_coins=creator_coins,
-                platform_coins=compute_platform_coins(EPISODE_UNLOCK_COST),
-            )
-            db.add(earning)
+        creator_coins = await credit_creator(db, series.creator_id, EPISODE_UNLOCK_COST, episode.id)
     history = (await db.execute(select(WatchHistory).where(
         WatchHistory.user_id == user.id,
         WatchHistory.episode_id == episode.id,
@@ -141,5 +127,54 @@ async def pay_with_coins(db: AsyncSession, user_id: str, episode_id: str) -> dic
         "source": "coins",
         "coins_after": user.coins,
         "creator_credited_coins": creator_coins,
+        "playback_url": playback_url,
+    }
+
+
+async def pay_with_ad(db: AsyncSession, user_id: str, episode_id: str) -> dict:
+    """Unlock an episode via rewarded ad: credit REWARDED_AD_REWARD coins to user,
+    record AdImpression, stamp WatchHistory.unlocked_via_ad, return signed playback URL.
+    """
+    from app.core.errors import AppError
+    from app.db.models import AdImpression, CoinTxn, WatchHistory
+    user = await db.get(User, user_id)
+    episode = (await db.execute(select(Episode).where(Episode.id == episode_id))).scalar_one_or_none()
+    if not user or not episode:
+        raise PaywallRequired(detail="Episode not found")
+    from app.integrations.cloudflare_stream import mint_signed_playback_url
+    ad_id = f"ad_{uuid.uuid4().hex[:8]}"
+    impression = AdImpression(
+        id=str(uuid.uuid4()),
+        user_id=user_id,
+        ad_id=ad_id,
+        ad_network="appLovin",
+        ad_type="rewarded",
+        watched_s=15,
+        completed=True,
+        rewarded_coins=REWARDED_AD_REWARD,
+    )
+    db.add(impression)
+    user.coins += REWARDED_AD_REWARD
+    txn = CoinTxn(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        delta=REWARDED_AD_REWARD,
+        reason="rewarded_ad",
+        ref_id=impression.id,
+        balance_after=user.coins,
+    )
+    db.add(txn)
+    history = (await db.execute(select(WatchHistory).where(
+        WatchHistory.user_id == user.id,
+        WatchHistory.episode_id == episode.id,
+    ))).scalar_one_or_none()
+    if history:
+        history.unlocked_via_ad = True
+    await db.commit()
+    playback_url = await mint_signed_playback_url(episode.video_uid)
+    return {
+        "ok": True,
+        "source": "ad",
+        "coins_after": user.coins,
         "playback_url": playback_url,
     }

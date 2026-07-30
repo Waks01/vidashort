@@ -3,3 +3,8 @@ export * from "./schemas/series";
 export * from "./schemas/paywall";
 export * from "./schemas/coin";
 export * from "./schemas/ads";
+export * from "./schemas/comment";
+export * from "./schemas/watch-history";
+export * from "./schemas/favorite";
+export * from "./schemas/device";
+export * from "./schemas/notification";

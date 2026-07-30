@@ -2,14 +2,34 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy import text
 
 from app.core.config import settings
 from app.core.errors import AppError
 from app.core.logging import setup_logging
 from app.db.session import get_db, get_redis
-from app.routers import auth, me, content, entitlement, coins, ads, creator, admin, webhooks
+from app.routers import auth, me, content, entitlement, coins, ads, creator, admin, webhooks, devices, notifications
+
+CACHEABLE_ROUTES = {
+    "/v1/content/series",
+    "/v1/content/series/",
+    "/v1/coins/packs",
+    "/v1/vip/plans",
+}
+
+
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path
+        for prefix in CACHEABLE_ROUTES:
+            if path == prefix or path.startswith(prefix + "/"):
+                response.headers["Cache-Control"] = "public, max-age=300, s-maxage=300"
+                break
+        return response
 
 
 @asynccontextmanager
@@ -19,6 +39,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="vidashort-api", lifespan=lifespan)
+
+app.add_middleware(CacheControlMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,6 +81,8 @@ app.include_router(ads.router, prefix="/v1/ads", tags=["ads"])
 app.include_router(creator.router, prefix="/v1/creator", tags=["creator"])
 app.include_router(admin.router, prefix="/v1/admin", tags=["admin"])
 app.include_router(webhooks.router, prefix="/v1/webhooks", tags=["webhooks"])
+app.include_router(devices.router, prefix="/v1/devices", tags=["devices"])
+app.include_router(notifications.router, prefix="/v1/notifications", tags=["notifications"])
 
 
 @app.get("/health")

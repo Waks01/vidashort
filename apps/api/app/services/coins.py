@@ -22,12 +22,29 @@ async def balance(db: AsyncSession, user_id: str) -> BalanceResponse:
         )
         for t in result.scalars().all()
     ]
+
+    lifetime_purchased = (await db.execute(
+        select(func.coalesce(func.sum(CoinTxn.delta), 0)).where(CoinTxn.user_id == user_id, CoinTxn.reason == "purchase", CoinTxn.delta > 0)
+    )).scalar_one()
+
+    lifetime_spent = (await db.execute(
+        select(func.coalesce(func.sum(-CoinTxn.delta), 0)).where(CoinTxn.user_id == user_id, CoinTxn.reason == "unlock", CoinTxn.delta < 0)
+    )).scalar_one()
+
+    lifetime_earned_ads = (await db.execute(
+        select(func.coalesce(func.sum(CoinTxn.delta), 0)).where(CoinTxn.user_id == user_id, CoinTxn.reason == "rewarded_ad")
+    )).scalar_one()
+
+    lifetime_earned_daily = (await db.execute(
+        select(func.coalesce(func.sum(CoinTxn.delta), 0)).where(CoinTxn.user_id == user_id, CoinTxn.reason == "daily_reward")
+    )).scalar_one()
+
     return BalanceResponse(
         coins=user.coins,
-        lifetime_purchased=0,
-        lifetime_spent=0,
-        lifetime_earned_ads=0,
-        lifetime_earned_daily=0,
+        lifetime_purchased=lifetime_purchased,
+        lifetime_spent=lifetime_spent,
+        lifetime_earned_ads=lifetime_earned_ads,
+        lifetime_earned_daily=lifetime_earned_daily,
         recent=txns,
     )
 
@@ -46,4 +63,68 @@ async def packs(db: AsyncSession) -> PacksResponse:
 
 async def purchase(db: AsyncSession, user_id: str, payload) -> dict:
     from app.core.errors import AppError
-    raise AppError(status_code=501, detail="IAP receipt verification not implemented")
+    from app.db.models import User, CoinTxn
+    from app.services.revenue_split import COINS_PER_NAIRA
+
+    user = await db.get(User, user_id)
+    if not user:
+        raise AppError(status_code=404, code="not_found", detail="User not found")
+
+    if payload.receipt.provider == "apple":
+        from app.integrations.apple import verify_receipt
+        result = await verify_receipt(payload.receipt.data)
+        if not result.get("valid"):
+            raise AppError(status_code=400, code="invalid_receipt", detail="Apple receipt verification failed")
+        product_id = result.get("product_id", "")
+        txn_id = result.get("original_txn_id") or payload.receipt.txn_id
+    elif payload.receipt.provider == "google":
+        from app.integrations.google import verify_purchase
+        result = await verify_purchase(payload.receipt.data, "com.vidashort.app", payload.pack_id)
+        if not result.get("valid"):
+            raise AppError(status_code=400, code="invalid_receipt", detail="Google purchase verification failed")
+        product_id = result.get("product_id", "")
+        txn_id = result.get("purchase_token") or payload.receipt.txn_id
+    elif payload.receipt.provider == "revenuecat":
+        from app.integrations.revenuecat import fetch_subscriber_info
+        sub = await fetch_subscriber_info(user_id)
+        if not sub or not sub.get("entitlements"):
+            raise AppError(status_code=400, code="invalid_receipt", detail="RevenueCat verification failed")
+        product_id = "vip_monthly"
+        txn_id = payload.receipt.txn_id
+    else:
+        raise AppError(status_code=400, code="unsupported_provider", detail=f"Provider {payload.receipt.provider} not supported")
+
+    existing = (await db.execute(select(CoinTxn).where(CoinTxn.ref_id == txn_id))).scalar_one_or_none()
+    if existing:
+        raise AppError(status_code=409, code="already_charged", detail="This receipt was already used")
+
+    packs = {
+        "pack_100": {"coins": 100, "bonus": 0},
+        "pack_500": {"coins": 500, "bonus": 0},
+        "pack_2200": {"coins": 2000, "bonus": 200},
+        "pack_6000": {"coins": 5000, "bonus": 1000},
+        "pack_19000": {"coins": 15000, "bonus": 4000},
+    }
+    pack = packs.get(payload.pack_id)
+    if not pack:
+        raise AppError(status_code=404, code="pack_not_found", detail=f"Pack {payload.pack_id} not found")
+
+    total_coins = pack["coins"] + pack["bonus"]
+    user.coins += total_coins
+    txn = CoinTxn(
+        id=str(__import__("uuid").uuid4()),
+        user_id=user.id,
+        delta=total_coins,
+        reason="purchase",
+        ref_id=txn_id,
+        balance_after=user.coins,
+    )
+    db.add(txn)
+    await db.commit()
+
+    return {
+        "coins": user.coins,
+        "txnId": str(txn.id),
+        "creditedCoins": pack["coins"],
+        "bonusCoins": pack["bonus"],
+    }

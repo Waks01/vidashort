@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.schemas.auth import (
     AppleAuthRequest,
@@ -20,6 +21,13 @@ from app.services import auth as auth_service
 router = APIRouter()
 
 
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "0.0.0.0"
+
+
 @router.post("/refresh", response_model=AuthResponse)
 async def refresh(
     payload: RefreshRequest,
@@ -34,7 +42,12 @@ async def signup(payload: SignupRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/signin", response_model=AuthResponse)
-async def signin(payload: SigninRequest, db: AsyncSession = Depends(get_db)):
+async def signin(
+    payload: SigninRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    await rate_limit(None, _client_ip(request), "auth:signin", limit=5, window_s=600)
     return await auth_service.signin(db, payload)
 
 

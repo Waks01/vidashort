@@ -1,3 +1,4 @@
+from app.db.models.push_token import PushToken
 from app.db.base import Base
 from app.db.models.content import Episode, Series
 from app.db.models.economy import AdImpression, CoinTxn, CreatorEarning, PayoutRequest
@@ -29,4 +30,5 @@ __all__ = [
     "VipEntitlement",
     "ModerationItem",
     "AuditLog",
+    "PushToken",
 ]

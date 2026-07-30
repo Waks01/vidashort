@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/overview", response_model=AdminOverviewResponse)
 async def overview(
-    range: str = Query("24h"),
+    range: str = Query("7d"),
     user: dict = Depends(get_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -31,7 +31,7 @@ async def moderation(
     kind: str | None = Query(None),
     status: str | None = Query(None),
     cursor: str | None = Query(None),
-    limit: int = Query(20),
+    limit: int = Query(20, ge=1, le=50),
     user: dict = Depends(get_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -48,7 +48,7 @@ async def moderation_decide(
     return await admin_service.moderation_decide(db, user["id"], id, payload)
 
 
-@router.get("/content")
+@router.get("/content", response_model=dict)
 async def content_list(
     cursor: str | None = Query(None),
     source: str | None = Query(None),
@@ -81,7 +81,7 @@ async def content_feature(
     return await admin_service.content_feature(db, user["id"], id, payload)
 
 
-@router.get("/users")
+@router.get("/users", response_model=dict)
 async def user_list(
     cursor: str | None = Query(None),
     role: str | None = Query(None),
@@ -93,7 +93,7 @@ async def user_list(
     return await admin_service.user_list(db, cursor, role, q, banned)
 
 
-@router.get("/users/{id}")
+@router.get("/users/{id}", response_model=dict)
 async def user_detail(
     id: str,
     user: dict = Depends(get_admin),
@@ -112,7 +112,7 @@ async def user_update(
     return await admin_service.user_update(db, user["id"], id, payload)
 
 
-@router.get("/ads", response_model=list[AdminAdCampaignItem])
+@router.get("/ad-campaigns", response_model=list[AdminAdCampaignItem])
 async def ad_campaigns(
     user: dict = Depends(get_admin),
     db: AsyncSession = Depends(get_db),
@@ -120,7 +120,7 @@ async def ad_campaigns(
     return await admin_service.ad_campaigns(db)
 
 
-@router.patch("/ads/{id}")
+@router.post("/ad-campaigns/{id}")
 async def ad_campaign_update(
     id: str,
     payload: dict,
@@ -147,3 +147,14 @@ async def payout_decide(
     db: AsyncSession = Depends(get_db),
 ):
     return await admin_service.payout_decide(db, user["id"], id, payload)
+
+
+@router.post("/cron/{name}")
+async def run_cron(
+    name: str,
+    user: dict = Depends(get_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.worker import cron as cron_module
+    result = await cron_module.run_cron(db, name)
+    return result

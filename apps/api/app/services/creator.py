@@ -55,7 +55,24 @@ async def update_profile(db: AsyncSession, user_id: str, payload) -> CreatorProf
 async def list_series(db: AsyncSession, user_id: str) -> CreatorSeriesResponse:
     result = await db.execute(select(Series).where(Series.creator_id == user_id))
     series = result.scalars().all()
-    return CreatorSeriesResponse(items=[])
+    items = []
+    for s in series:
+        items.append(CreatorSeriesItem(
+            id=str(s.id),
+            slug=s.slug,
+            title=s.title,
+            category=s.category,
+            language=s.language,
+            total_episodes=s.total_episodes,
+            moderation_status=s.moderation_status,
+            is_published=s.is_published,
+            total_views=0,
+            total_unlocks=0,
+            earnings_coins=0,
+            earnings_naira=0.0,
+            created_at=s.created_at.isoformat() if s.created_at else None,
+        ))
+    return CreatorSeriesResponse(items=items)
 
 
 async def create_series(db: AsyncSession, user_id: str, payload) -> CreatorSeriesCreateResponse:
@@ -107,10 +124,6 @@ async def create_series(db: AsyncSession, user_id: str, payload) -> CreatorSerie
 
 
 async def update_series(db: AsyncSession, user_id: str, id: str, payload) -> dict:
-    """Patch editable fields on a series owned by `user_id`. Ownership is
-    enforced — a creator cannot edit someone else's series. Only allowed when
-    the series is not yet published (post-launch edits would re-trigger
-    moderation; Phase 3 may relax this with a separate 'edit request' flow)."""
     from app.core.errors import AppError
     from app.db.models import Episode as EpisodeModel
     series = await db.get(Series, id)
@@ -129,7 +142,6 @@ async def update_series(db: AsyncSession, user_id: str, id: str, payload) -> dic
     if payload.language is not None:
         series.language = payload.language
     if payload.total_episodes is not None and payload.total_episodes != series.total_episodes:
-        # Adding episodes: mint new Episode rows + fresh upload URLs.
         existing = (await db.execute(
             select(EpisodeModel).where(EpisodeModel.series_id == series.id)
         )).scalars().all()
@@ -158,11 +170,6 @@ async def update_series(db: AsyncSession, user_id: str, id: str, payload) -> dic
 
 
 async def submit_for_review(db: AsyncSession, user_id: str, id: str) -> dict:
-    """Move a draft series into the moderation queue. Requirements:
-      - Series must exist and be owned by user_id
-      - All episodes must have a video_ready Cloudflare Stream callback
-      - Series.is_published stays False until moderation approves
-    The record lands on `moderation_items` (kind='series') for the admin queue."""
     from app.core.errors import AppError
     from app.db.models import Episode as EpisodeModel, ModerationItem
     import json as _json
@@ -194,9 +201,6 @@ async def submit_for_review(db: AsyncSession, user_id: str, id: str) -> dict:
 
 
 async def get_upload_url(db: AsyncSession, user_id: str, id: str, n: int) -> dict:
-    """Issue a fresh TUS direct-upload URL for episode `n` of series `id`. Used
-    when an upload failed mid-way and the creator needs to retry without
-    re-creating the series."""
     from app.core.errors import AppError
     from app.db.models import Episode as EpisodeModel
     series = await db.get(Series, id)
@@ -217,17 +221,86 @@ async def get_upload_url(db: AsyncSession, user_id: str, id: str, n: int) -> dic
 
 
 async def analytics(db: AsyncSession, user_id: str, range: str) -> dict:
-    return {"totals": {}, "daily": [], "by_series": []}
+    from datetime import datetime, timedelta
+    from app.db.models import Episode
+    
+    days = 30
+    if range == "7d":
+        days = 7
+    elif range == "90d":
+        days = 90
+    
+    series_result = await db.execute(select(Series).where(Series.creator_id == user_id))
+    creator_series = series_result.scalars().all()
+    series_ids = [str(s.id) for s in creator_series]
+    
+    if not series_ids:
+        return {"totals": {"views": 0, "unlocks": 0, "earnings_coins": 0}, "daily": [], "by_series": []}
+    
+    earnings_result = await db.execute(
+        select(CreatorEarning).where(CreatorEarning.creator_id == user_id)
+    )
+    earnings = earnings_result.scalars().all()
+    total_coins = sum(e.creator_coins for e in earnings)
+    
+    episode_ids = set()
+    for s in creator_series:
+        eps = (await db.execute(
+            select(Episode.id).where(Episode.series_id == s.id)
+        )).scalars().all()
+        episode_ids.update(str(eid) for eid in eps)
+    
+    by_series = []
+    for s in creator_series:
+        series_earnings = [e for e in earnings if str(e.episode_id) in episode_ids]
+        series_coins = sum(e.creator_coins for e in series_earnings)
+        by_series.append({
+            "series_id": str(s.id),
+            "title": s.title,
+            "earnings_coins": series_coins,
+            "earnings_naira": series_coins / 10,
+            "views": 0,
+            "unlocks": len(series_earnings),
+        })
+    
+    return {
+        "totals": {"views": 0, "unlocks": len(earnings), "earnings_coins": total_coins},
+        "daily": [],
+        "by_series": by_series,
+    }
 
 
 async def earnings(db: AsyncSession, user_id: str) -> CreatorEarningsResponse:
-    result = await db.execute(select(CreatorEarning).where(CreatorEarning.creator_id == user_id))
+    result = await db.execute(select(CreatorEarning).where(CreatorEarning.creator_id == user_id).order_by(CreatorEarning.created_at.desc()))
     earnings = result.scalars().all()
     lifetime_coins = sum(e.creator_coins for e in earnings)
+    
+    payouts_result = await db.execute(
+        select(PayoutRequest).where(
+            PayoutRequest.creator_id == user_id,
+            PayoutRequest.status.in_(["approved", "paid"])
+        )
+    )
+    payouts = payouts_result.scalars().all()
+    payout_coins = sum(p.amount_coins for p in payouts)
+    pending_coins = lifetime_coins - payout_coins
+    
+    transactions = [
+        {
+            "id": str(e.id),
+            "type": "earning",
+            "coins": e.creator_coins,
+            "naira": e.creator_coins / 10,
+            "episode_id": str(e.episode_id),
+            "created_at": e.created_at.isoformat() if e.created_at else None,
+        }
+        for e in earnings
+    ]
+    
     return CreatorEarningsResponse(
         lifetime={"coins": lifetime_coins, "naira": lifetime_coins / 10},
-        pending={"coins": lifetime_coins, "naira": lifetime_coins / 10, "availableForPayout": lifetime_coins >= 50000},
-        transactions=[],
+        pending={"coins": pending_coins, "naira": pending_coins / 10, "availableForPayout": pending_coins >= 50000},
+        transactions=transactions,
     )
 
 
@@ -235,6 +308,23 @@ async def request_payout(db: AsyncSession, user_id: str, payload) -> PayoutRespo
     from app.core.errors import AppError
     if payload.amount_coins < 50000:
         raise AppError(status_code=400, code="below_minimum", detail="Minimum payout is 50,000 coins")
+    
+    earnings_result = await db.execute(select(CreatorEarning).where(CreatorEarning.creator_id == user_id))
+    earnings = earnings_result.scalars().all()
+    total_earned = sum(e.creator_coins for e in earnings)
+    payouts_result = await db.execute(
+        select(PayoutRequest).where(
+            PayoutRequest.creator_id == user_id,
+            PayoutRequest.status.in_(["approved", "paid"])
+        )
+    )
+    payouts = payouts_result.scalars().all()
+    total_paid = sum(p.amount_coins for p in payouts)
+    pending = total_earned - total_paid
+    
+    if payload.amount_coins > pending:
+        raise AppError(status_code=400, code="insufficient_balance", detail="Requested amount exceeds available balance")
+    
     payout = PayoutRequest(
         id=str(__import__("uuid").uuid4()),
         creator_id=user_id,
@@ -246,10 +336,33 @@ async def request_payout(db: AsyncSession, user_id: str, payload) -> PayoutRespo
     )
     db.add(payout)
     await db.commit()
-    return PayoutResponse(payout={"id": str(payout.id), "amountCoins": payout.amount_coins, "amountNaira": float(payout.amount_naira), "status": payout.status, "payoutMethod": payout.payout_method, "payoutAccount": payout.payout_account, "requestedAt": payout.requested_at.isoformat() if payout.requested_at else None})
+    return PayoutResponse(payout={
+        "id": str(payout.id),
+        "amountCoins": payout.amount_coins,
+        "amountNaira": float(payout.amount_naira),
+        "status": payout.status,
+        "payoutMethod": payout.payout_method,
+        "payoutAccount": payout.payout_account,
+        "requestedAt": payout.requested_at.isoformat() if payout.requested_at else None,
+    })
 
 
 async def list_payouts(db: AsyncSession, user_id: str) -> PayoutListResponse:
     result = await db.execute(select(PayoutRequest).where(PayoutRequest.creator_id == user_id).order_by(PayoutRequest.requested_at.desc()))
     payouts = result.scalars().all()
-    return PayoutListResponse(items=[])
+    items = [
+        PayoutItem(
+            id=str(p.id),
+            amount_coins=p.amount_coins,
+            amount_naira=float(p.amount_naira),
+            status=p.status,
+            payout_method=p.payout_method,
+            payout_account=p.payout_account,
+            requested_at=p.requested_at.isoformat() if p.requested_at else None,
+            decided_at=p.decided_at.isoformat() if p.decided_at else None,
+            decided_by=str(p.decided_by) if p.decided_by else None,
+            note=p.note,
+        )
+        for p in payouts
+    ]
+    return PayoutListResponse(items=items)

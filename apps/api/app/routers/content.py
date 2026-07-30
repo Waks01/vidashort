@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_current_user
 from app.db.session import get_db
 from app.schemas.content import (
+    CommentCreateRequest,
+    CommentLikeResponse,
+    CommentListResponse,
     EntitlementError,
     FeaturedResponse,
     FavoriteResponse,
@@ -12,11 +16,10 @@ from app.schemas.content import (
     SeriesListResponse,
     StreamResponse,
 )
+from app.db.models import Comment as CommentModel
 from app.services import content as content_service
 
 router = APIRouter()
-
-
 @router.get("/series", response_model=SeriesListResponse)
 async def list_series(
     cursor: str | None = Query(None),
@@ -71,3 +74,52 @@ async def unfavorite(
 @router.get("/featured", response_model=FeaturedResponse)
 async def featured(db: AsyncSession = Depends(get_db)):
     return await content_service.featured(db)
+
+
+@router.get("/episodes/{episode_id}/comments", response_model=CommentListResponse)
+async def list_comments(
+    episode_id: str,
+    cursor: str | None = Query(None),
+    limit: int = Query(20, le=50),
+    order: str = Query("new"),
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await content_service.list_comments(db, episode_id, cursor, limit, order)
+
+
+@router.post("/episodes/{episode_id}/comments", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def create_comment(
+    episode_id: str,
+    payload: CommentCreateRequest,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await content_service.create_comment(db, user["id"], episode_id, payload.body)
+
+
+@router.post("/comments/{comment_id}/reply", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def reply_comment(
+    comment_id: str,
+    payload: CommentCreateRequest,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await content_service.create_comment(db, user["id"], comment_id, payload.body, parent_id=comment_id)
+
+
+@router.post("/comments/{comment_id}/like", response_model=CommentLikeResponse)
+async def like_comment(
+    comment_id: str,
+    user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await content_service.like_comment(db, user["id"], comment_id)
+
+
+@router.get("/comments/{parent_id}/replies", response_model=CommentListResponse)
+async def list_replies(
+    parent_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    return await content_service.list_replies(db, parent_id)

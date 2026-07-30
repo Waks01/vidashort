@@ -1,23 +1,41 @@
 {
   "name": "@vidashort/shared",
-  "version": "0.1.0",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "version": "1.0.2",
+  "description": "Shared TypeScript types and Zod schemas for vidashort",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./schemas/*": {
-      "types": "./src/schemas/*",
-      "default": "./src/schemas/*"
+      "types": "./dist/schemas/*.d.ts",
+      "default": "./dist/schemas/*.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
+  "keywords": [
+    "vidashort",
+    "types",
+    "zod",
+    "schemas"
+  ],
+  "license": "MIT",
   "dependencies": {
-    "typescript": "^7.0.2",
     "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

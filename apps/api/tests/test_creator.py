@@ -195,6 +195,17 @@ async def test_request_payout_rejects_below_minimum(client):
 @pytest.mark.asyncio
 async def test_request_payout_accepts_exactly_minimum(client, db_session):
     creator_id = await _create_creator(client, "payout-ok@example.com")
+    # Seed some earnings so the payout request is within available balance.
+    from app.db.models import CreatorEarning
+    db_session.add(CreatorEarning(
+        id=str(uuid.uuid4()),
+        creator_id=creator_id,
+        episode_id=str(uuid.uuid4()),
+        gross_coins=100000,
+        creator_coins=60000,
+    ))
+    await db_session.commit()
+
     resp = await client.post("/v1/creator/payouts", json={
         "amount_coins": 50000,  # exactly ₦5,000
     }, headers=auth_headers(creator_id, role="creator"))

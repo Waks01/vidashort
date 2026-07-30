@@ -135,3 +135,76 @@ async def unfavorite(db: AsyncSession, user_id: str, series_id: str):
 
 async def featured(db: AsyncSession) -> FeaturedResponse:
     return FeaturedResponse(items=[])
+
+
+async def list_comments(db: AsyncSession, episode_id: str, cursor: str | None, limit: int, order: str = "new") -> dict:
+    from app.db.models import Comment as CommentModel, User
+    stmt = select(CommentModel, User).where(CommentModel.episode_id == episode_id, CommentModel.deleted_at == None, CommentModel.parent_id == None).join(User, CommentModel.user_id == User.id, isouter=True)
+    if order == "top":
+        stmt = stmt.order_by(CommentModel.likes.desc())
+    else:
+        stmt = stmt.order_by(CommentModel.created_at.desc())
+    stmt = stmt.limit(limit)
+    if cursor:
+        stmt = stmt.where(CommentModel.id > cursor)
+    result = await db.execute(stmt)
+    rows = result.all()
+    items = []
+    for c, u in rows:
+        items.append({
+            "id": str(c.id),
+            "user": {"id": str(c.user_id), "name": u.name if u else "Deleted user", "avatarUrl": u.avatar_url if u else None},
+            "body": c.body,
+            "likes": c.likes,
+            "liked": False,
+            "replies": [],
+            "createdAt": c.created_at.isoformat() if c.created_at else None,
+        })
+    next_cursor = rows[-1][0].id if len(rows) == limit else None
+    return {"items": items, "next_cursor": next_cursor}
+
+
+async def create_comment(db: AsyncSession, user_id: str, episode_id: str, body: str, parent_id: str | None = None) -> dict:
+    from app.core.errors import AppError
+    from app.db.models import Comment as CommentModel
+    comment = CommentModel(
+        id=str(__import__("uuid").uuid4()),
+        episode_id=episode_id,
+        user_id=user_id,
+        body=body,
+        likes=0,
+        parent_id=parent_id,
+    )
+    db.add(comment)
+    await db.commit()
+    return {"id": str(comment.id), "body": comment.body, "parent_id": str(comment.parent_id) if comment.parent_id else None, "createdAt": comment.created_at.isoformat() if comment.created_at else None}
+
+
+async def like_comment(db: AsyncSession, user_id: str, comment_id: str) -> dict:
+    from app.core.errors import AppError
+    from app.db.models import Comment as CommentModel
+    comment = await db.get(CommentModel, comment_id)
+    if not comment:
+        raise AppError(status_code=404, code="not_found", detail="Comment not found")
+    comment.likes += 1
+    await db.commit()
+    return {"likes": comment.likes}
+
+
+async def list_replies(db: AsyncSession, parent_id: str, limit: int = 20) -> dict:
+    from app.db.models import Comment as CommentModel, User
+    stmt = select(CommentModel, User).where(CommentModel.parent_id == parent_id, CommentModel.deleted_at == None).join(User, CommentModel.user_id == User.id, isouter=True).order_by(CommentModel.created_at.asc()).limit(limit)
+    result = await db.execute(stmt)
+    rows = result.all()
+    items = []
+    for r, u in rows:
+        items.append({
+            "id": str(r.id),
+            "user": {"id": str(r.user_id), "name": u.name if u else "Deleted user", "avatarUrl": u.avatar_url if u else None},
+            "body": r.body,
+            "likes": r.likes,
+            "liked": False,
+            "replies": [],
+            "createdAt": r.created_at.isoformat() if r.created_at else None,
+        })
+    return {"items": items}
