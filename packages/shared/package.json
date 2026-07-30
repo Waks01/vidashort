@@ -1,6 +1,6 @@
 {
   "name": "@vidashort/shared",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Shared TypeScript types and Zod schemas for vidashort",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,7 +15,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc",
